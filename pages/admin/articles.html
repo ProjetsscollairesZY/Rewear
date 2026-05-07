@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Annonces - Admin REWEAR DZ</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: sans-serif;   background: radial-gradient(ellipse at top right, #EADBC8, #3E2A1F);
+ color: #f4e5c2; min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 220px; background: rgba(61,40,23,0.95);
+      border-right: 1px solid rgba(212,165,116,0.2);
+      padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;
+    }
+    .sidebar-logo {
+      font-size: 1rem; font-weight: 800;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 1.5rem; padding-left: 0.5rem;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 0.75rem; border-radius: 8px; text-decoration: none;
+      color: #c89b5f; font-size: 0.88rem; font-weight: 600;
+      transition: 0.2s; border: 1px solid transparent;
+    }
+    .nav-item:hover { background: rgba(212,165,116,0.12); color: #f4e5c2; }
+    .nav-item.active { background: rgba(212,165,116,0.18); color: #f4e5c2; border-color: rgba(212,165,116,0.3); }
+    .sidebar-bottom { margin-top: auto; }
+    .btn-logout-admin {
+      width: 100%; padding: 0.6rem; border-radius: 8px;
+      background: rgba(220,80,80,0.1); border: 1px solid rgba(220,80,80,0.3);
+      color: #e07070; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-logout-admin:hover { background: rgba(220,80,80,0.22); }
+    .admin-main { flex: 1; padding: 2rem; overflow-y: auto; }
+    .admin-main h1 {
+      font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .filters {
+      display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;
+    }
+    .search-input {
+      padding: 0.4rem 0.85rem; border-radius: 8px;
+      border: 1px solid rgba(212,165,116,0.3);
+      background: rgba(61,40,23,0.8); color: #f4e5c2;
+      font-size: 0.82rem; outline: none; width: 220px;
+    }
+    .filter-select {
+      padding: 0.4rem 0.85rem; border-radius: 8px;
+      border: 1px solid rgba(212,165,116,0.3);
+      background: rgba(61,40,23,0.8); color: #f4e5c2;
+      font-size: 0.82rem; outline: none; cursor: pointer;
+    }
+    .count-label { font-size: 0.82rem; color: #c89b5f; margin-left: auto; }
+    .table-wrap {
+      background: rgba(61,40,23,0.75);
+      border: 1px solid rgba(212,165,116,0.2);
+      border-radius: 14px; overflow: hidden; backdrop-filter: blur(6px);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: rgba(81,54,32,0.8); }
+    th {
+      padding: 0.85rem 1rem; text-align: left;
+      font-size: 0.78rem; font-weight: 700; color: #c89b5f;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    td { padding: 0.75rem 1rem; font-size: 0.85rem; border-top: 1px solid rgba(212,165,116,0.1); }
+    tr:hover td { background: rgba(212,165,116,0.05); }
+    .article-img {
+      width: 48px; height: 48px; object-fit: cover;
+      border-radius: 8px; border: 1px solid rgba(212,165,116,0.2);
+    }
+    .img-placeholder {
+      width: 48px; height: 48px; border-radius: 8px;
+      background: rgba(81,54,32,0.6);
+      display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .badge-active { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: rgba(92,184,92,0.15); border: 1px solid rgba(92,184,92,0.35); color: #7dd87d; }
+    .badge-inactive { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: rgba(200,155,95,0.15); border: 1px solid rgba(200,155,95,0.3); color: #c89b5f; }
+    .btn-action { padding: 0.3rem 0.75rem; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+    .btn-toggle { background: rgba(212,165,116,0.12); border-color: rgba(212,165,116,0.3); color: #d4a574; }
+    .btn-toggle:hover { background: rgba(212,165,116,0.25); }
+    .btn-delete { background: rgba(220,80,80,0.12); border-color: rgba(220,80,80,0.3); color: #e07070; }
+    .btn-delete:hover { background: rgba(220,80,80,0.25); }
+    .btn-view { background: rgba(92,184,92,0.12); border-color: rgba(92,184,92,0.3); color: #7dd87d; }
+    .btn-view:hover { background: rgba(92,184,92,0.25); }
+    .actions-cell { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .loading-msg { text-align: center; color: #c89b5f; padding: 2rem; }
+    .empty-msg { text-align: center; color: #a07850; padding: 2rem; }
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: rgba(61,40,23,0.97); border: 1px solid rgba(212,165,116,0.4);
+      border-radius: 10px; padding: 0.75rem 1.25rem; color: #f4e5c2;
+      font-size: 0.875rem; font-weight: 600; z-index: 9999;
+      transform: translateY(80px); opacity: 0; transition: 0.3s; pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(92,184,92,0.5); }
+    .toast.error { border-color: rgba(220,80,80,0.5); color: #e07070; }
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">⚙️ Admin Panel</div>
+    <a href="index.html"        class="nav-item"><span>🏠</span> Dashboard</a>
+    <a href="users.html"        class="nav-item"><span>👥</span> Utilisateurs</a>
+    <a href="articles.html"     class="nav-item active"><span>👗</span> Annonces</a>
+    <a href="signalements.html" class="nav-item"><span>🚩</span> Signalements</a>
+    <div class="sidebar-bottom">
+      <a href="../index.html" class="nav-item" style="margin-bottom:0.5rem;"><span>←</span> Retour au site</a>
+      <button class="btn-logout-admin" id="btnLogout">Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <h1>👗 Annonces</h1>
+
+    <div class="filters">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Rechercher une annonce...">
+      <select class="filter-select" id="filterStatus">
+        <option value="">Toutes</option>
+        <option value="active">Actives</option>
+        <option value="inactive">Inactives</option>
+      </select>
+      <span class="count-label" id="countLabel">—</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Photo</th>
+            <th>Titre</th>
+            <th>Prix</th>
+            <th>État</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="7" class="loading-msg">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script/admin-guard.js"></script>
+<script src="script/articles.js"></script>
+</body>
+</html>

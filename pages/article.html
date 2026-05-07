@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article - REWEAR DZ</title>
+  <link rel="stylesheet" href="../styles/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .detail-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .back-link { color: #c89b5f; text-decoration: none; font-size: 0.875rem; }
+    .back-link:hover { color: #f4e5c2; }
+
+    /* ── MAIN CARD ── */
+    .detail-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      background: rgba(61, 40, 23, 0.75);
+      border: 1px solid rgba(212, 165, 116, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(8px);
+    }
+
+    /* ── GALLERY ── */
+    .gallery { display: flex; flex-direction: column; gap: 0.75rem; position: relative; }
+    .gallery-main {
+      width: 100%; aspect-ratio: 1; object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid rgba(212, 165, 116, 0.15);
+      background: rgba(81, 54, 32, 0.5);
+      display: block;
+    }
+    .gallery-thumbs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .gallery-thumbs img {
+      width: 60px; height: 60px; object-fit: cover;
+      border-radius: 8px; cursor: pointer;
+      border: 2px solid transparent; opacity: 0.7; transition: 0.2s;
+    }
+    .gallery-thumbs img.active, .gallery-thumbs img:hover { border-color: #d4a574; opacity: 1; }
+
+    /* ── FAV BUTTON ── */
+    .btn-fav {
+      position: absolute;
+      top: 0.75rem; right: 0.75rem;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(61, 40, 23, 0.85);
+      border: 1px solid rgba(212, 165, 116, 0.3);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: 0.2s;
+      backdrop-filter: blur(4px);
+    }
+    .btn-fav:hover { background: rgba(61, 40, 23, 0.98); transform: scale(1.1); }
+    .btn-fav.active { border-color: #e07070; }
+
+    /* ── ARTICLE INFO ── */
+    .detail-info { display: flex; flex-direction: column; gap: 1rem; }
+    .detail-info h1 { font-size: 1.35rem; font-weight: 800; color: #f4e5c2; line-height: 1.3; }
+    .detail-price {
+      font-size: 1.8rem; font-weight: 800;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .detail-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.3rem 0.75rem; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 600;
+      background: rgba(212, 165, 116, 0.12);
+      border: 1px solid rgba(212, 165, 116, 0.25); color: #d4a574;
+    }
+    .detail-desc { font-size: 0.9rem; color: #c89b5f; line-height: 1.6; white-space: pre-wrap; }
+    .detail-divider { border: none; border-top: 1px solid rgba(212, 165, 116, 0.15); }
+
+    /* ── ACTION BUTTONS ── */
+    .action-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn-interest {
+      flex: 1;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      color: #3d2817; font-weight: 700; font-size: 0.9rem;
+      border: none; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-interest:hover { opacity: 0.9; }
+    .btn-interest:disabled { opacity: 0.5; cursor: default; }
+
+    /* ── SELLER CARD ── */
+    .seller-card {
+      background: rgba(81, 54, 32, 0.6);
+      border: 1px solid rgba(212, 165, 116, 0.2);
+      border-radius: 16px; padding: 1.25rem 1.5rem;
+      display: flex; align-items: flex-start; gap: 1.25rem; flex-wrap: wrap;
+      backdrop-filter: blur(6px);
+    }
+    .seller-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      color: #3d2817; font-size: 1.4rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; border: 2px solid rgba(212, 165, 116, 0.4);
+    }
+    .seller-info { flex: 1; min-width: 0; }
+    .seller-info h3 { font-size: 1rem; font-weight: 700; color: #f4e5c2; margin-bottom: 0.2rem; }
+    .seller-rating-line {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.6rem; flex-wrap: wrap;
+    }
+    .stars-display { color: #d4a574; font-size: 1rem; letter-spacing: 1px; }
+    .rating-avg { font-weight: 700; color: #f4e5c2; font-size: 0.9rem; }
+    .rating-count { font-size: 0.78rem; color: #c89b5f; }
+    .seller-label { font-size: 0.78rem; color: #c89b5f; margin-bottom: 0.6rem; }
+    .seller-contacts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .contact-chip {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.35rem 0.85rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600; text-decoration: none;
+      border: 1px solid rgba(212, 165, 116, 0.3);
+      background: rgba(212, 165, 116, 0.1); color: #d4a574; transition: 0.2s;
+    }
+    .contact-chip:hover { background: rgba(212, 165, 116, 0.22); color: #f4e5c2; }
+    .contact-chip.insta { border-color: rgba(225,100,150,0.35); color: #e19abf; background: rgba(225,100,150,0.08); }
+    .contact-chip.insta:hover { background: rgba(225,100,150,0.18); }
+    .contact-chip.fb { border-color: rgba(66,103,200,0.4); color: #8aabf0; background: rgba(66,103,200,0.08); }
+    .contact-chip.fb:hover { background: rgba(66,103,200,0.18); }
+    .contact-chip.no-contact { color: #a07850; border-style: dashed; font-style: italic; cursor: default; }
+
+    /* ── REVIEWS SECTION ── */
+    .reviews-section {
+      background: rgba(61, 40, 23, 0.75);
+      border: 1px solid rgba(212, 165, 116, 0.2);
+      border-radius: 16px; overflow: hidden; backdrop-filter: blur(6px);
+    }
+    .reviews-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid rgba(212, 165, 116, 0.15);
+    }
+    .reviews-header h2 { font-size: 1rem; font-weight: 700; color: #f4e5c2; }
+    .btn-review {
+      padding: 0.4rem 1rem; border-radius: 999px;
+      background: rgba(212, 165, 116, 0.15);
+      border: 1px solid rgba(212, 165, 116, 0.35);
+      color: #d4a574; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: 0.2s;
+    }
+    .btn-review:hover { background: rgba(212, 165, 116, 0.25); color: #f4e5c2; }
+
+    .reviews-list { padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .review-item {
+      padding: 0.9rem 1rem;
+      background: rgba(81, 54, 32, 0.5);
+      border-radius: 10px;
+      border: 1px solid rgba(212, 165, 116, 0.1);
+    }
+    .review-top { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
+    .review-author { font-weight: 700; font-size: 0.85rem; color: #f4e5c2; }
+    .review-stars { color: #d4a574; font-size: 0.85rem; }
+    .review-date { font-size: 0.72rem; color: #a07850; margin-left: auto; }
+    .review-comment { font-size: 0.85rem; color: #c89b5f; line-height: 1.5; }
+    .reviews-empty { padding: 2rem 1.5rem; text-align: center; color: #a07850; font-size: 0.88rem; }
+
+    /* ── REVIEW FORM ── */
+    .review-form-wrap {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid rgba(212, 165, 116, 0.15);
+      display: none;
+      flex-direction: column; gap: 0.9rem;
+    }
+    .review-form-wrap.open { display: flex; }
+    .review-form-wrap h3 { font-size: 0.95rem; font-weight: 700; color: #f4e5c2; }
+    .star-picker { display: flex; gap: 0.35rem; }
+    .star-picker span {
+      font-size: 1.6rem; cursor: pointer; color: rgba(212,165,116,0.3);
+      transition: color 0.15s;
+    }
+    .star-picker span.on { color: #d4a574; }
+    .review-form-wrap textarea {
+      width: 100%; padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid rgba(212, 165, 116, 0.3);
+      background: rgba(255,255,255,0.06);
+      color: #f4e5c2; font-size: 0.88rem; resize: vertical; min-height: 80px;
+      outline: none; font-family: inherit;
+    }
+    .btn-report {
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  background: rgba(220, 80, 80, 0.1);
+  border: 1px solid rgba(220, 80, 80, 0.35);
+  color: #e07070;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-report:hover { background: rgba(220, 80, 80, 0.2); }
+    .review-form-wrap textarea:focus { border-color: rgba(212,165,116,0.7); }
+    .review-form-actions { display: flex; gap: 0.6rem; }
+    .btn-submit-review {
+      padding: 0.55rem 1.25rem; border-radius: 8px;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      color: #3d2817; font-weight: 700; font-size: 0.85rem;
+      border: none; cursor: pointer;
+    }
+    .btn-cancel-review {
+      padding: 0.55rem 1rem; border-radius: 8px;
+      background: rgba(212,165,116,0.1);
+      border: 1px solid rgba(212,165,116,0.3);
+      color: #c89b5f; font-size: 0.85rem; cursor: pointer;
+    }
+    .review-error { font-size: 0.8rem; color: #e07070; display: none; }
+
+    /* ── INTEREST MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 500; display: flex; align-items: center; justify-content: center;
+      padding: 1rem; opacity: 0; visibility: hidden; transition: 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal {
+      background: rgba(61, 40, 23, 0.98);
+      border: 1px solid rgba(212, 165, 116, 0.3);
+      border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 420px;
+      transform: translateY(-12px); transition: 0.2s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal h3 { font-size: 1rem; color: #f4e5c2; margin-bottom: 1.25rem; font-weight: 700; }
+    .modal-field { margin-bottom: 0.9rem; }
+    .modal-field label { display: block; font-size: 0.78rem; color: #c89b5f; margin-bottom: 0.35rem; }
+    .modal-field input, .modal-field textarea {
+      width: 100%; padding: 0.6rem 0.85rem; border-radius: 8px;
+      border: 1px solid rgba(212,165,116,0.3);
+      background: rgba(255,255,255,0.06); color: #f4e5c2;
+      font-size: 0.88rem; outline: none; font-family: inherit;
+    }
+    .modal-field textarea { resize: vertical; min-height: 70px; }
+    .modal-field input:focus, .modal-field textarea:focus { border-color: rgba(212,165,116,0.7); }
+    .modal-actions { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
+    .btn-modal-cancel {
+      flex: 1; padding: 0.6rem; border-radius: 8px;
+      background: rgba(212,165,116,0.1); border: 1px solid rgba(212,165,116,0.3);
+      color: #f4e5c2; font-weight: 600; cursor: pointer;
+    }
+    .btn-modal-send {
+      flex: 1; padding: 0.6rem; border-radius: 8px;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      border: none; color: #3d2817; font-weight: 700; cursor: pointer;
+    }
+    .modal-error { font-size: 0.8rem; color: #e07070; margin-top: 0.5rem; display: none; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: rgba(61, 40, 23, 0.97);
+      border: 1px solid rgba(212, 165, 116, 0.4);
+      border-radius: 10px; padding: 0.75rem 1.25rem;
+      color: #f4e5c2; font-size: 0.875rem; font-weight: 600;
+      z-index: 9999; transform: translateY(80px); opacity: 0;
+      transition: 0.3s; pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(92, 184, 92, 0.5); }
+    .toast.error { border-color: rgba(220, 80, 80, 0.5); color: #e07070; }
+
+    /* ── LOADING / ERROR ── */
+    .page-loading, .page-error { text-align: center; padding: 4rem 1rem; color: #c89b5f; }
+    .page-error { color: #e07070; }
+
+    @media (max-width: 640px) {
+      .detail-card { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo gradient-text">REWEAR DZ</div>
+    <div class="nav-right">
+      <div class="only-guest" id="guest-nav">
+        <a href="login.html" class="nav-btn">Se connecter</a>
+        <a href="signin.html" class="nav-btn btn-primary">S'inscrire</a>
+      </div>
+      <div class="only-auth" id="auth-nav">
+        <a href="../roles/vendeur/publier.html" class="btn-publish">+ Publier</a>
+        <div class="user-menu">
+          <div class="user-avatar" id="avatar-btn">?</div>
+          <div class="dropdown" id="dropdown">
+            <div class="dropdown-header">
+              <div class="username" id="dd-username">Chargement…</div>
+            </div>
+            <a href="profile.html"><span class="icon">👤</span> Mon profil</a>
+            <a href="myarticles.html"><span class="icon">📦</span> Mes annonces</a>
+            <button class="dd-item logout-btn" id="logout-btn">
+              <span class="icon">🚪</span> Se déconnecter
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="detail-wrap" id="detailWrap">
+    <div class="page-loading" id="pageLoading">Chargement de l'article...</div>
+  </div>
+
+  <!-- Interest Modal -->
+  <div class="modal-overlay" id="interestModal">
+    <div class="modal">
+      <h3>🛒 Signaler votre intérêt</h3>
+      <div class="modal-field">
+        <label>Votre nom *</label>
+        <input type="text" id="intName" placeholder="Prénom Nom" maxlength="80">
+      </div>
+      <div class="modal-field">
+        <label>Téléphone *</label>
+        <input type="tel" id="intPhone" placeholder="0555 12 34 56" maxlength="20">
+      </div>
+      <div class="modal-field">
+        <label>Email (optionnel)</label>
+        <input type="email" id="intEmail" placeholder="votre@email.com">
+      </div>
+      <div class="modal-field">
+        <label>Message (optionnel)</label>
+        <textarea id="intMessage" placeholder="Votre message au vendeur..."></textarea>
+      </div>
+      <p class="modal-error" id="intError"></p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="intCancel">Annuler</button>
+        <button class="btn-modal-send" id="intSend">Envoyer</button>
+      </div>
+    </div>
+  </div>
+<!-- Report Modal -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal">
+    <h3>🚩 Signaler ce vendeur</h3>
+    <div class="modal-field">
+      <label>Motif *</label>
+      <select id="repExcuse" style="width:100%;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid rgba(212,165,116,0.3);background:rgba(255,255,255,0.06);color:#f4e5c2;font-size:0.88rem;outline:none;font-family:inherit;">
+        <option value="">-- Choisir un motif --</option>
+        <option value="arnaque">Arnaque / Fraude</option>
+        <option value="faux_article">Article faux ou mal décrit</option>
+        <option value="comportement">Comportement inapproprié</option>
+        <option value="spam">Spam</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Commentaire (optionnel)</label>
+      <textarea id="repComment" placeholder="Décrivez le problème..." style="width:100%;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid rgba(212,165,116,0.3);background:rgba(255,255,255,0.06);color:#f4e5c2;font-size:0.88rem;resize:vertical;min-height:80px;outline:none;font-family:inherit;"></textarea>
+    </div>
+    <p class="modal-error" id="repError"></p>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" id="repCancel">Annuler</button>
+      <button class="btn-modal-send" id="repSend" style="background:linear-gradient(135deg,#e07070,#f4a0a0);color:#3d1717;">Signaler</button>
+    </div>
+  </div>
+</div>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="../script/auth.js"></script>
+  <script>
+  (function () {
+    var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
+    var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    var params    = new URLSearchParams(window.location.search);
+    var articleId = params.get('id');
+    var wrap      = document.getElementById('detailWrap');
+    var loading   = document.getElementById('pageLoading');
+
+   
+    /* ── Helpers ── */
+function esc(s) { return (String(s||'')).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }    function initials(n) {
+      if (!n) return '?';
+      var p = n.trim().split(' ');
+      return p.length >= 2 ? (p[0][0]+p[1][0]).toUpperCase() : n[0].toUpperCase();
+    }
+    function safeUrl(val, prefix) {
+      if (!val) return '';
+      val = val.trim();
+      return val.startsWith('http') ? val : prefix + val;
+    }
+    function starsHtml(n, total) {
+      total = total || 5;
+      var s = '';
+      for (var i = 1; i <= total; i++) s += i <= Math.round(n) ? '★' : '☆';
+      return s;
+    }
+    function showToast(msg, type) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + (type || '');
+      setTimeout(function() { t.className = 'toast'; }, 3000);
+    }
+
+    if (!articleId) {
+      loading.className = 'page-error';
+      loading.textContent = 'Article introuvable.';
+      return;
+    }
+
+   
+
+client.auth.getSession().then(function(sessionResult) {
+  var session = sessionResult.data.session;
+  var currentUser = session ? session.user : null;
+
+  // ── 1. Fetch article ──
+  client.from('articles')
+    .select('id,title,description,price,etat,taille,wilaya,images,category_id,created_at,seller_id')
+    .eq('id', articleId).eq('is_active', true).single()
+    .then(function(r) {
+      if (r.error || !r.data) {
+        loading.className = 'page-error';
+        loading.textContent = 'Article introuvable ou désactivé.';
+        return;
+      }
+      var article = r.data;
+
+      // ── 2. Fetch seller + reviews ──
+      Promise.all([
+        client.from('profiles').select('username,phone,instagram,facebook').eq('id', article.seller_id).maybeSingle(),
+        client.from('seller_reviews').select('id,rating,comment,created_at,author_id').eq('seller_id', article.seller_id).order('created_at', { ascending: false }),
+        currentUser
+          ? client.from('favorites').select('id').eq('user_id', currentUser.id).eq('article_id', articleId).maybeSingle()
+          : Promise.resolve({ data: null })
+      ]).then(function(results) {
+        var profile = (results[0].data) || {};
+        var reviews = (results[1].data) || [];
+        var isFav   = !!(results[2].data);
+        render(article, profile, reviews, isFav, currentUser); // ← passer currentUser
+      });
+    });
+});
+    /* ── RENDER ── */
+    function render(a, profile, reviews, isFav,currentUser) {
+      loading.remove();
+
+      /* Back */
+      var backEl = document.createElement('a');
+      backEl.href = '../index.html';
+      backEl.className = 'back-link';
+      backEl.textContent = '← Retour aux annonces';
+      wrap.appendChild(backEl);
+
+      /* Gallery */
+      var images  = (a.images && a.images.length > 0) ? a.images : [];
+      var mainSrc = images[0] || '';
+      var thumbsHtml = '';
+      if (images.length > 1) {
+        images.forEach(function(src, i) {
+          thumbsHtml += '<img src="'+src+'" class="'+(i===0?'active':'')+'" data-src="'+src+'" alt="">';
+        });
+      }
+
+      /* Badges */
+      var badges = '';
+      if (a.etat)   badges += '<span class="badge">🏷️ '+esc(a.etat)+'</span>';
+      if (a.taille) badges += '<span class="badge">📏 '+esc(a.taille)+'</span>';
+      if (a.wilaya) badges += '<span class="badge">📍 '+esc(a.wilaya)+'</span>';
+
+      var date = a.created_at
+        ? new Date(a.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})
+        : '';
+
+      /* Seller contacts */
+      var sellerName = profile.username || 'Vendeur';
+      var contacts = '';
+      if (profile.phone)     contacts += '<a class="contact-chip" href="tel:'+profile.phone+'">📞 '+esc(profile.phone)+'</a>';
+      if (profile.instagram) {
+        var h = profile.instagram.replace(/^@/,'');
+        contacts += '<a class="contact-chip insta" href="'+safeUrl(h,'https://instagram.com/')+'" target="_blank" rel="noopener">📸 @'+esc(h)+'</a>';
+      }
+      if (profile.facebook)  contacts += '<a class="contact-chip fb" href="'+safeUrl(profile.facebook,'https://facebook.com/')+'" target="_blank" rel="noopener">🔵 '+esc(profile.facebook.replace(/^@/,''))+'</a>';
+      if (!contacts)         contacts  = '<span class="contact-chip no-contact">Aucun contact renseigné</span>';
+
+      /* Rating */
+      var avgRating = 0, ratingHtml = '';
+      if (reviews.length > 0) {
+        avgRating = reviews.reduce(function(s,r){return s+r.rating;},0) / reviews.length;
+        ratingHtml =
+          '<div class="seller-rating-line">' +
+            '<span class="stars-display">'+starsHtml(avgRating)+'</span>' +
+            '<span class="rating-avg">'+avgRating.toFixed(1)+'/5</span>' +
+            '<span class="rating-count">('+reviews.length+' avis)</span>' +
+          '</div>';
+      } else {
+        ratingHtml = '<div class="seller-rating-line"><span class="rating-count">Aucun avis pour l\'instant</span></div>';
+      }
+
+  /* Fav button (only if logged in and not own article) */
+var favBtnHtml = '';
+var isOwn = currentUser && currentUser.id === a.seller_id;
+if (currentUser && !isOwn) {
+  favBtnHtml = '<button class="btn-fav" id="btnFav" title="'+(isFav?'Retirer des favoris':'Ajouter aux favoris')+'">'+(isFav?'❤️':'🤍')+'</button>';
+}
+
+/* Interest button */
+var interestBtn = isOwn
+  ? ''
+  : '<button class="btn-interest" id="btnInterest">🛒 Je suis intéressé(e)</button>';
+
+/* Report button */
+var reportBtn = isOwn
+  ? ''
+  : '<button class="btn-report" id="btnReport">🚩 Signaler le vendeur</button>';
+
+/* ── Build DOM ── */
+var card = document.createElement('div');
+card.className = 'detail-card';
+card.innerHTML =
+  '<div class="gallery">' +
+    (mainSrc
+      ? '<img class="gallery-main" id="galleryMain" src="'+mainSrc+'" alt="'+esc(a.title)+'">'
+      : '<div class="gallery-main" style="display:flex;align-items:center;justify-content:center;font-size:3rem;">📦</div>') +
+    favBtnHtml +
+    (thumbsHtml ? '<div class="gallery-thumbs" id="galleryThumbs">'+thumbsHtml+'</div>' : '') +
+  '</div>' +
+  '<div class="detail-info">' +
+    '<h1>'+esc(a.title)+'</h1>' +
+    '<div class="detail-price">'+Number(a.price||0).toLocaleString('fr-DZ')+' DA</div>' +
+    '<div class="detail-badges">'+badges+'</div>' +
+    (date ? '<div style="font-size:0.78rem;color:#a07850;">Publié le '+date+'</div>' : '') +
+    '<hr class="detail-divider">' +
+    '<p class="detail-desc">'+esc(a.description||'Aucune description.')+'</p>' +
+    '<div class="action-btns">'+interestBtn+reportBtn+'</div>' +
+  '</div>';
+wrap.appendChild(card);
+
+      /* Seller card */
+      var sellerEl = document.createElement('div');
+      sellerEl.className = 'seller-card';
+      sellerEl.innerHTML =
+        '<div class="seller-avatar">'+initials(sellerName)+'</div>' +
+        '<div class="seller-info">' +
+          '<h3>'+esc(sellerName)+'</h3>' +
+          ratingHtml +
+          '<div class="seller-label">Vendeur REWEAR DZ</div>' +
+          '<div class="seller-contacts">'+contacts+'</div>' +
+        '</div>';
+      wrap.appendChild(sellerEl);
+
+      /* Reviews section */
+      var reviewsEl = document.createElement('div');
+      reviewsEl.className = 'reviews-section';
+
+      var canReview = currentUser && !isOwn;
+      reviewsEl.innerHTML =
+        '<div class="reviews-header">' +
+          '<h2>⭐ Avis sur le vendeur</h2>' +
+          (canReview ? '<button class="btn-review" id="btnOpenReview">+ Laisser un avis</button>' : '') +
+        '</div>' +
+        '<div class="reviews-list" id="reviewsList"></div>' +
+        (canReview ?
+          '<div class="review-form-wrap" id="reviewForm">' +
+            '<h3>Votre avis</h3>' +
+            '<div class="star-picker" id="starPicker">' +
+              '<span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>' +
+            '</div>' +
+            '<textarea id="reviewComment" placeholder="Votre commentaire (optionnel)..."></textarea>' +
+            '<p class="review-error" id="reviewError"></p>' +
+            '<div class="review-form-actions">' +
+              '<button class="btn-submit-review" id="btnSubmitReview">Publier</button>' +
+              '<button class="btn-cancel-review" id="btnCancelReview">Annuler</button>' +
+            '</div>' +
+          '</div>'
+        : '');
+      wrap.appendChild(reviewsEl);
+
+      /* Fill reviews list */
+      renderReviews(reviews);
+
+      /* ── EVENTS ── */
+
+      /* Gallery thumbs */
+      var mainImg  = document.getElementById('galleryMain');
+      var thumbsEl = document.getElementById('galleryThumbs');
+      if (mainImg && thumbsEl) {
+        thumbsEl.querySelectorAll('img').forEach(function(thumb) {
+          thumb.addEventListener('click', function() {
+            mainImg.src = thumb.getAttribute('data-src');
+            thumbsEl.querySelectorAll('img').forEach(function(t){t.classList.remove('active');});
+            thumb.classList.add('active');
+          });
+        });
+      }
+
+      /* Fav button */
+      var btnFav = document.getElementById('btnFav');
+      if (btnFav) {
+        var favActive = isFav;
+        btnFav.addEventListener('click', function() {
+          if (!currentUser) { showToast('Connectez-vous pour ajouter aux favoris.', 'error'); return; }
+          if (favActive) {
+            client.from('favorites').delete().eq('user_id', currentUser.id).eq('article_id', articleId)
+              .then(function(r) {
+                if (r.error) { showToast('Erreur.', 'error'); return; }
+                favActive = false;
+                btnFav.textContent = '🤍';
+                btnFav.title = 'Ajouter aux favoris';
+                showToast('Retiré des favoris.', 'success');
+              });
+          } else {
+            client.from('favorites').insert({ user_id: currentUser.id, article_id: articleId })
+              .then(function(r) {
+                if (r.error) { showToast('Erreur.', 'error'); return; }
+                favActive = true;
+                btnFav.textContent = '❤️';
+                btnFav.title = 'Retirer des favoris';
+                showToast('Ajouté aux favoris !', 'success');
+              });
+          }
+        });
+      }
+
+      /* Interest modal */
+      var interestModal = document.getElementById('interestModal');
+      var btnInterest   = document.getElementById('btnInterest');
+      if (btnInterest) {
+        btnInterest.addEventListener('click', function() {
+          if (!currentUser) {
+            /* Pre-fill nothing, open anyway */
+          }
+          interestModal.classList.add('open');
+        });
+      }
+      document.getElementById('intCancel').addEventListener('click', function() {
+        interestModal.classList.remove('open');
+      });
+      interestModal.addEventListener('click', function(e) {
+        if (e.target === interestModal) interestModal.classList.remove('open');
+      });
+      document.getElementById('intSend').addEventListener('click', function() {
+        var name  = document.getElementById('intName').value.trim();
+        var phone = document.getElementById('intPhone').value.trim();
+        var email = document.getElementById('intEmail').value.trim();
+        var msg   = document.getElementById('intMessage').value.trim();
+        var errEl = document.getElementById('intError');
+
+        if (!name || !phone) {
+          errEl.textContent = 'Le nom et le téléphone sont requis.';
+          errEl.style.display = 'block';
+          return;
+        }
+        errEl.style.display = 'none';
+        var sendBtn = document.getElementById('intSend');
+        sendBtn.disabled = true; sendBtn.textContent = 'Envoi...';
+
+        client.from('purchase_interest').insert({
+          article_id:  articleId,
+          buyer_id:    currentUser ? currentUser.id : null,
+          buyer_name:  name,
+          buyer_phone: phone,
+          buyer_email: email || null,
+          message:     msg   || null
+        }).then(function(r) {
+          sendBtn.disabled = false; sendBtn.textContent = 'Envoyer';
+          if (r.error) { errEl.textContent = 'Erreur : '+r.error.message; errEl.style.display='block'; return; }
+          interestModal.classList.remove('open');
+          showToast('Intérêt enregistré ! Le vendeur vous contactera.', 'success');
+          if (btnInterest) { btnInterest.disabled = true; btnInterest.textContent = '✅ Intérêt envoyé'; }
+        });
+      });
+/* Report modal */
+var reportModal = document.getElementById('reportModal');
+var btnReport   = document.getElementById('btnReport');
+
+if (btnReport) {
+  btnReport.addEventListener('click', function() {
+    if (!currentUser) {
+      showToast('Connectez-vous pour signaler.', 'error');
+      return;
+    }
+    reportModal.classList.add('open');
+  });
+}
+
+document.getElementById('repCancel').addEventListener('click', function() {
+  reportModal.classList.remove('open');
+});
+
+reportModal.addEventListener('click', function(e) {
+  if (e.target === reportModal) reportModal.classList.remove('open');
+});
+
+document.getElementById('repSend').addEventListener('click', function() {
+  var excuse  = document.getElementById('repExcuse').value;
+  var comment = document.getElementById('repComment').value.trim();
+  var errEl   = document.getElementById('repError');
+  var sendBtn = document.getElementById('repSend');
+
+  if (!excuse) {
+    errEl.textContent = 'Choisissez un motif.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Envoi...';
+
+  client.from('seller_signalements').insert({
+    seller_id: a.seller_id,
+    author_id: currentUser.id,
+    excuse:    excuse,
+    comment:   comment || null
+  }).then(function(r) {
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Signaler';
+    if (r.error) {
+      errEl.textContent = 'Erreur : ' + r.error.message;
+      errEl.style.display = 'block';
+      return;
+    }
+    reportModal.classList.remove('open');
+    showToast('Signalement envoyé. Merci !', 'success');
+    // Reset form
+    document.getElementById('repExcuse').value = '';
+    document.getElementById('repComment').value = '';
+  });
+});
+      /* Review form */
+      var btnOpenReview   = document.getElementById('btnOpenReview');
+      var reviewForm      = document.getElementById('reviewForm');
+      var btnCancelReview = document.getElementById('btnCancelReview');
+      var btnSubmitReview = document.getElementById('btnSubmitReview');
+      var starPicker      = document.getElementById('starPicker');
+      var selectedRating  = 0;
+
+      if (btnOpenReview) {
+        btnOpenReview.addEventListener('click', function() {
+          reviewForm.classList.toggle('open');
+        });
+      }
+      if (btnCancelReview) {
+        btnCancelReview.addEventListener('click', function() {
+          reviewForm.classList.remove('open');
+        });
+      }
+
+      /* Star picker */
+      if (starPicker) {
+        var stars = starPicker.querySelectorAll('span');
+        stars.forEach(function(star) {
+          star.addEventListener('mouseenter', function() {
+            var v = parseInt(star.getAttribute('data-v'));
+            stars.forEach(function(s) { s.classList.toggle('on', parseInt(s.getAttribute('data-v')) <= v); });
+          });
+          star.addEventListener('mouseleave', function() {
+            stars.forEach(function(s) { s.classList.toggle('on', parseInt(s.getAttribute('data-v')) <= selectedRating); });
+          });
+          star.addEventListener('click', function() {
+            selectedRating = parseInt(star.getAttribute('data-v'));
+            stars.forEach(function(s) { s.classList.toggle('on', parseInt(s.getAttribute('data-v')) <= selectedRating); });
+          });
+        });
+      }
+
+      if (btnSubmitReview) {
+  btnSubmitReview.addEventListener('click', function() {
+    var comment = document.getElementById('reviewComment').value.trim();
+    var errEl   = document.getElementById('reviewError');
+    if (!currentUser) { errEl.textContent='Connectez-vous.'; errEl.style.display='block'; return; }
+    if (selectedRating === 0) { errEl.textContent='Choisissez une note.'; errEl.style.display='block'; return; }
+    errEl.style.display = 'none';
+    btnSubmitReview.disabled = true; btnSubmitReview.textContent = 'Envoi...';
+
+    // Vérifier si l'utilisateur a déjà laissé un avis
+    client.from('seller_reviews')
+      .select('id')
+      .eq('author_id', currentUser.id)
+      .eq('seller_id', a.seller_id)
+      .maybeSingle()
+      .then(function(check) {
+        if (check.data) {
+          // Déjà un avis → proposer de modifier
+          errEl.textContent = 'Vous avez déjà laissé un avis pour ce vendeur.';
+          errEl.style.display = 'block';
+          btnSubmitReview.disabled = false;
+          btnSubmitReview.textContent = 'Publier';
+          return;
+        }
+
+        // Pas encore d'avis → insérer
+        client.from('seller_reviews').insert({
+          seller_id: a.seller_id,
+          author_id: currentUser.id,
+          rating:    selectedRating,
+          comment:   comment || null
+        }).then(function(r) {
+          btnSubmitReview.disabled = false; btnSubmitReview.textContent = 'Publier';
+          if (r.error) {
+            errEl.textContent = r.error.code === '23505'
+              ? 'Vous avez déjà laissé un avis pour ce vendeur.'
+              : 'Erreur : ' + r.error.message;
+            errEl.style.display = 'block';
+            return;
+          }
+          showToast('Avis publié !', 'success');
+          reviewForm.classList.remove('open');
+          // Cacher le bouton "Laisser un avis" pour cette session
+          if (btnOpenReview) {
+            btnOpenReview.textContent = '✅ Avis déjà laissé';
+            btnOpenReview.disabled = true;
+          }
+          // Recharger les avis
+          client.from('seller_reviews')
+            .select('id,rating,comment,created_at,author_id')
+            .eq('seller_id', a.seller_id)
+            .order('created_at', { ascending: false })
+            .then(function(rv) {
+              var newReviews = rv.data || [];
+              renderReviews(newReviews);
+              if (newReviews.length > 0) {
+                var avg = newReviews.reduce(function(s,x){return s+x.rating;},0)/newReviews.length;
+                var rl = sellerEl.querySelector('.seller-rating-line');
+                if (rl) rl.innerHTML =
+                  '<span class="stars-display">'+starsHtml(avg)+'</span>' +
+                  '<span class="rating-avg">'+avg.toFixed(1)+'/5</span>' +
+                  '<span class="rating-count">('+newReviews.length+' avis)</span>';
+              }
+            });
+        });
+      });
+  });
+}
+    } /* end render */
+
+    /* ── Render reviews list ── */
+    function renderReviews(reviews) {
+      var list = document.getElementById('reviewsList');
+      if (!list) return;
+      if (reviews.length === 0) {
+        list.innerHTML = '<div class="reviews-empty">Aucun avis pour le moment. Soyez le premier !</div>';
+        return;
+      }
+      list.innerHTML = '';
+      reviews.forEach(function(rv) {
+        var date = rv.created_at
+          ? new Date(rv.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})
+          : '';
+        var item = document.createElement('div');
+        item.className = 'review-item';
+        item.innerHTML =
+          '<div class="review-top">' +
+            '<span class="review-author">Acheteur</span>' +
+            '<span class="review-stars">'+starsHtml(rv.rating)+'</span>' +
+            (date ? '<span class="review-date">'+date+'</span>' : '') +
+          '</div>' +
+          (rv.comment ? '<div class="review-comment">'+esc(rv.comment)+'</div>' : '');
+        list.appendChild(item);
+      });
+    }
+
+  })();
+  </script>
+</body>
+</html>

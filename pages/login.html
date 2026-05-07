@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - REWEAR DZ</title>
+  <link rel="stylesheet" href="../styles/login.css">
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<a href="../index.html" class="back-home">← Retour à l'accueil</a>
+
+<div class="login-container">
+  <div class="login-box">
+    <h2>Se connecter</h2>
+    <p id="loginError" class="form-error" style="display:none;"></p>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Mot de passe" required>
+      <div class="recaptcha-wrap">
+        <div class="g-recaptcha" data-sitekey="6Le4dIEsAAAAANj3lcKG1AYeL26DYNVQnqt6mMgC"></div>
+      </div>
+      <button type="submit" class="login-btn">Connexion</button>
+    </form>
+    <p class="signup-text">Pas encore inscrit ? <a href="./signin.html">Créer un compte</a></p>
+  </div>
+</div>
+
+<script src="../script/auth.js"></script>
+<script>
+  window.showAuthError = function(msg) {
+    var el = document.getElementById('loginError');
+    if (el) { el.textContent = msg; el.style.display = 'block'; }
+  };
+  window.showAuthSuccess = function(msg) {
+    var el = document.getElementById('loginError');
+    if (el) { el.style.display = 'none'; }
+    alert(msg);
+  };
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'none';
+    var token = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
+    if (token && window.verifyRecaptcha) {
+      var ok = await window.verifyRecaptcha(token);
+      if (!ok) {
+        errEl.textContent = 'Vérification de sécurité échouée. Cochez la case et réessayez.';
+        errEl.style.display = 'block';
+        return;
+      }
+    }
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    await login(email, password);
+    if (typeof grecaptcha !== 'undefined' && grecaptcha.reset) grecaptcha.reset();
+  });
+</script>
+
+</body>
+</html>

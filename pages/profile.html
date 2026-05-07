@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Profil - REWEAR DZ</title>
+  <link rel="stylesheet" href="../styles/profile.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="logo gradient-text">REWEAR DZ</a>
+    <div class="nav-right">
+      <a href="../index.html" class="nav-btn">← Accueil</a>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+
+    <div class="profile-card">
+      <div class="avatar-wrap">
+        <div class="avatar-circle" id="avatarCircle">?</div>
+        <div class="avatar-badge"></div>
+      </div>
+      <div class="profile-info">
+        <h1 id="profileName">Chargement...</h1>
+        <p class="email" id="profileEmail"></p>
+      
+<div class="profile-meta">
+  <span class="meta-chip"><span class="icon">⭐</span>Vendeur vérifié</span>
+  <span id="socialChips"></span>
+</div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-edit" id="btnEditProfile">✏️ Modifier</button>
+        <button class="btn-logout" id="btnLogout">Déconnexion</button>
+      </div>
+    </div>
+
+  <div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-num" id="statArticles">—</div>
+    <div class="stat-label">Annonces publiées</div>
+  </div>
+  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='../pages/favorites.html'">
+    <div class="stat-num">❤️</div>
+    <div class="stat-label">Mes favoris</div>
+  </div>
+</div>
+
+    <div class="section">
+      <div class="section-header">
+        <h2> Mes annonces</h2>
+        <a href="../roles/vendeur/publier.html" class="btn-publish-sm">+ Publier</a>
+      </div>
+      <div id="articlesContainer">
+        <div class="loading-state">Chargement de vos annonces...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <h3> Modifier le profil</h3>
+      <div class="modal-field">
+        <label>Nom d'utilisateur</label>
+        <input type="text" id="editUsername" placeholder="Votre nom" maxlength="60">
+      </div>
+      <div class="modal-field">
+        <label>Wilaya</label>
+        <input type="text" id="editWilaya" placeholder="Ex: Alger, Sétif..." maxlength="60">
+      </div>
+      <div class="modal-field">
+  <label>📞 Téléphone</label>
+  <input type="tel" id="editPhone" placeholder="Ex: 0555 12 34 56" maxlength="20">
+</div>
+<div class="modal-field">
+  <label>📸 Instagram</label>
+  <input type="text" id="editInstagram" placeholder="@votre_compte" maxlength="60">
+</div>
+<div class="modal-field">
+  <label>🔵 Facebook</label>
+  <input type="text" id="editFacebook" placeholder="votre.nom ou lien complet" maxlength="120">
+</div>
+      <p class="modal-error" id="editError"></p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="btnCancelEdit">Annuler</button>
+        <button class="btn-modal-save" id="btnSaveEdit">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../script/profile.js"></script>
+</body>
+</html>

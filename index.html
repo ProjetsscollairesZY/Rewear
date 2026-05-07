@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REWEAR DZ - Enchères Mode</title>
+  <link rel="stylesheet" href="styles/index.css">
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="logo gradient-text">REWEAR DZ</div>
+
+    <div class="nav-right">
+
+      <!-- 👤 Non connecté (affiché par défaut) -->
+      <div class="only-guest" id="guest-nav">
+        <a href="pages/login.html" class="nav-btn">Se connecter</a>
+        <a href="pages/signin.html" class="nav-btn btn-primary">S'inscrire</a>
+      </div>
+
+      <!--  Connecté (caché par défaut, affiché par JS) -->
+     <div class="only-auth" id="auth-nav">
+  <a href="pages/admin/index.html" id="admin-link" style="display:none;" class="nav-btn"> Administration</a>
+  <a href="roles/vendeur/publier.html" class="btn-publish">+ Publier</a>
+  <div class="user-menu">
+
+          <div class="user-avatar" id="avatar-btn">?</div>
+
+          <div class="dropdown" id="dropdown">
+            <div class="dropdown-header">
+              <div class="username" id="dd-username">Chargement…</div>
+              <div class="user-rating" id="dd-rating"></div>
+            </div>
+
+            <a href="pages/profile.html"><span class="icon">👤</span> Mon profil</a>
+            <a href="pages/myarticles.html"><span class="icon">📦</span> Mes annonces</a>
+
+            <button class="dd-item logout-btn" id="logout-btn">
+              <span class="icon">🚪</span> Se déconnecter
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="container">
+
+
+
+    <div class="main-area">
+      <div class="category-bar">
+        <button class="category-btn active">Tous</button>
+        <button class="category-btn">Vêtements</button>
+        <button class="category-btn">Chaussures</button>
+        <button class="category-btn">Accessoires</button>
+        <button class="category-btn">Objets</button>
+        <button class="category-btn">Promotions</button>
+      </div>
+
+      <main class="content" id="articles">
+        <p id="articlesLoading" class="loading-msg">Chargement des annonces...</p>
+        <p id="articlesEmpty" class="empty-msg" style="display:none;">Aucune annonce pour le moment.</p>
+      </main>
+    </div>
+
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script/auth.js"></script>
+  <script src="script/articles.js"></script>
+  <script src="script/script.js"></script>
+  <script>
+(async function() {
+  var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
+  var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  var { data: { session } } = await client.auth.getSession();
+  if (!session) return;
+
+  try {
+    var payload = session.access_token.split('.')[1];
+    var decoded = JSON.parse(atob(payload));
+    if (decoded.user_role === 'admin') {
+      document.getElementById('admin-link').style.display = 'inline-flex';
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+
+</html>
