@@ -7,8 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: sans-serif;   background: radial-gradient(ellipse at top right, #EADBC8, #3E2A1F);
- color: #f4e5c2; min-height: 100vh; }
+    body { font-family: sans-serif; background: radial-gradient(ellipse at top right, #EADBC8, #3E2A1F); color: #f4e5c2; min-height: 100vh; }
     .admin-layout { display: flex; min-height: 100vh; }
     .sidebar {
       width: 220px; background: rgba(61,40,23,0.95);
@@ -42,9 +41,7 @@
       background: linear-gradient(135deg, #d4a574, #f4e5c2);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .filters {
-      display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;
-    }
+    .filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
     .search-input {
       padding: 0.4rem 0.85rem; border-radius: 8px;
       border: 1px solid rgba(212,165,116,0.3);
@@ -57,13 +54,14 @@
       background: rgba(61,40,23,0.8); color: #f4e5c2;
       font-size: 0.82rem; outline: none; cursor: pointer;
     }
-    .count-label { font-size: 0.82rem; color: #c89b5f; margin-left: auto; }
+    .count-label { font-size: 0.82rem; color: #a07850; margin-left: auto; }
     .table-wrap {
       background: rgba(61,40,23,0.75);
       border: 1px solid rgba(212,165,116,0.2);
       border-radius: 14px; overflow: hidden; backdrop-filter: blur(6px);
+      overflow-x: auto;
     }
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
     thead { background: rgba(81,54,32,0.8); }
     th {
       padding: 0.85rem 1rem; text-align: left;
@@ -72,30 +70,35 @@
     }
     td { padding: 0.85rem 1rem; font-size: 0.85rem; border-top: 1px solid rgba(212,165,116,0.1); }
     tr:hover td { background: rgba(212,165,116,0.05); }
+    tr.banned-row td { background: rgba(220,80,80,0.06); }
     .badge-role {
       display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
       font-size: 0.72rem; font-weight: 700;
     }
     .badge-admin { background: rgba(212,165,116,0.2); border: 1px solid rgba(212,165,116,0.5); color: #d4a574; }
-    .badge-user { background: rgba(92,184,92,0.15); border: 1px solid rgba(92,184,92,0.35); color: #7dd87d; }
+    .badge-user  { background: rgba(92,184,92,0.15);  border: 1px solid rgba(92,184,92,0.35);  color: #7dd87d; }
+    .badge-banni { background: rgba(220,80,80,0.2);   border: 1px solid rgba(220,80,80,0.5);   color: #e07070; }
     .avatar-sm {
       width: 32px; height: 32px; border-radius: 50%;
       background: linear-gradient(135deg, #d4a574, #f4e5c2);
       color: #3d2817; font-weight: 800; font-size: 0.85rem;
       display: inline-flex; align-items: center; justify-content: center;
     }
+    .avatar-sm.banned { background: rgba(220,80,80,0.4); color: #e07070; }
     .user-cell { display: flex; align-items: center; gap: 0.6rem; }
     .btn-action {
       padding: 0.3rem 0.75rem; border-radius: 8px; font-size: 0.75rem;
       font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
     }
-    .btn-role { background: rgba(212,165,116,0.12); border-color: rgba(212,165,116,0.3); color: #d4a574; }
-    .btn-role:hover { background: rgba(212,165,116,0.25); }
-    .btn-delete { background: rgba(220,80,80,0.12); border-color: rgba(220,80,80,0.3); color: #e07070; }
+    .btn-ban    { background: rgba(220,130,0,0.12);  border-color: rgba(220,130,0,0.35);  color: #e08020; }
+    .btn-ban:hover    { background: rgba(220,130,0,0.25); }
+    .btn-unban  { background: rgba(92,184,92,0.12);  border-color: rgba(92,184,92,0.35);  color: #7dd87d; }
+    .btn-unban:hover  { background: rgba(92,184,92,0.25); }
+    .btn-delete { background: rgba(220,80,80,0.12);  border-color: rgba(220,80,80,0.3);   color: #e07070; }
     .btn-delete:hover { background: rgba(220,80,80,0.25); }
     .actions-cell { display: flex; gap: 0.4rem; flex-wrap: wrap; }
     .loading-msg { text-align: center; color: #c89b5f; padding: 2rem; }
-    .empty-msg { text-align: center; color: #a07850; padding: 2rem; }
+    .empty-msg   { text-align: center; color: #a07850; padding: 2rem; }
     .toast {
       position: fixed; bottom: 1.5rem; right: 1.5rem;
       background: rgba(61,40,23,0.97); border: 1px solid rgba(212,165,116,0.4);
@@ -105,33 +108,70 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { border-color: rgba(92,184,92,0.5); }
-    .toast.error { border-color: rgba(220,80,80,0.5); color: #e07070; }
+    .toast.error   { border-color: rgba(220,80,80,0.5); color: #e07070; }
+
+    /* Modal ban */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 2000;
+      align-items: center; justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: rgba(61,40,23,0.99);
+      border: 1px solid rgba(212,165,116,0.3);
+      border-radius: 14px; padding: 1.5rem;
+      width: 380px; max-width: 90vw;
+    }
+    .modal h3 { color: #f4e5c2; margin-bottom: 1rem; font-size: 1rem; }
+    .modal label { display: block; font-size: 0.75rem; color: #a07850; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem; }
+    .modal textarea {
+      width: 100%; padding: 0.6rem 0.75rem;
+      background: rgba(81,54,32,0.9); border: 1px solid rgba(212,165,116,0.3);
+      border-radius: 8px; color: #f4e5c2; font-size: 0.85rem;
+      outline: none; resize: vertical; min-height: 80px; font-family: inherit;
+    }
+    .modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .btn-confirm-ban {
+      flex: 1; padding: 0.6rem;
+      background: rgba(220,80,80,0.2); border: 1px solid rgba(220,80,80,0.5);
+      border-radius: 8px; color: #e07070; font-weight: 700; font-size: 0.85rem;
+      cursor: pointer; transition: 0.2s;
+    }
+    .btn-confirm-ban:hover { background: rgba(220,80,80,0.35); }
+    .btn-cancel {
+      padding: 0.6rem 1rem;
+      background: rgba(212,165,116,0.1); border: 1px solid rgba(212,165,116,0.3);
+      border-radius: 8px; color: #c89b5f; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: 0.2s;
+    }
+    .btn-cancel:hover { background: rgba(212,165,116,0.2); }
   </style>
 </head>
 <body>
 
 <div class="admin-layout">
   <aside class="sidebar">
-    <div class="sidebar-logo">⚙️ Admin Panel</div>
-    <a href="index.html"        class="nav-item"><span>🏠</span> Dashboard</a>
-    <a href="users.html"        class="nav-item active"><span>👥</span> Utilisateurs</a>
-    <a href="articles.html"     class="nav-item"><span>👗</span> Annonces</a>
-    <a href="signalements.html" class="nav-item"><span>🚩</span> Signalements</a>
+    <div class="sidebar-logo">Admin Panel</div>
+    <a href="index.html"        class="nav-item"><span>&#8962;</span> Dashboard</a>
+    <a href="users.html"        class="nav-item active"><span>&#128101;</span> Utilisateurs</a>
+    <a href="articles.html"     class="nav-item"><span>&#128717;</span> Annonces</a>
+    <a href="signalements.html" class="nav-item"><span>&#9873;</span> Signalements</a>
     <div class="sidebar-bottom">
-      <a href="../../index.html" class="nav-item" style="margin-bottom:0.5rem;"><span>←</span> Retour au site</a>
-      <button class="btn-logout-admin" id="btnLogout">Déconnexion</button>
+      <a href="../../index.html" class="nav-item" style="margin-bottom:0.5rem;"><span>&#8592;</span> Retour au site</a>
+      <button class="btn-logout-admin" id="btnLogout">Deconnexion</button>
     </div>
   </aside>
 
   <main class="admin-main">
-    <h1>👥 Utilisateurs</h1>
-
+    <h1>Utilisateurs</h1>
     <div class="filters">
-      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Rechercher un utilisateur...">
+      <input type="text" class="search-input" id="searchInput" placeholder="Rechercher un utilisateur...">
       <select class="filter-select" id="filterRole">
-        <option value="">Tous les rôles</option>
+        <option value="">Tous les roles</option>
         <option value="admin">Admin</option>
         <option value="user">User</option>
+        <option value="banni">Bannis</option>
       </select>
       <span class="count-label" id="countLabel">—</span>
     </div>
@@ -141,9 +181,9 @@
         <thead>
           <tr>
             <th>Utilisateur</th>
-            <th>Téléphone</th>
+            <th>Telephone</th>
             <th>Instagram</th>
-            <th>Rôle</th>
+            <th>Statut</th>
             <th>Inscrit le</th>
             <th>Actions</th>
           </tr>
@@ -154,6 +194,19 @@
       </table>
     </div>
   </main>
+</div>
+
+<!-- Modal raison du ban -->
+<div class="modal-bg" id="modalBan">
+  <div class="modal">
+    <h3>Bannir cet utilisateur definitivement</h3>
+    <label>Raison du ban</label>
+    <textarea id="banReason" placeholder="Ex: arnaque confirmee, faux compte..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-confirm-ban" id="btnConfirmBan">Bannir definitivement</button>
+      <button class="btn-cancel" id="btnCancelBan">Annuler</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>

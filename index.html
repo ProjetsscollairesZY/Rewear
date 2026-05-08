@@ -1,103 +1,325 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>REWEAR DZ - Enchères Mode</title>
+  <title>REWEAR DZ - Mode Seconde Main</title>
   <link rel="stylesheet" href="styles/index.css">
-</head>
+  <style>
+    /* Sidebar toujours en overlay fixe, jamais inline */
+    .sidebar {
+      position: fixed !important;
+      left: -100% !important;
+      top: 0;
+      width: 260px;
+      max-width: 85vw;
+      height: 100vh;
+      z-index: 1000;
+      overflow-y: auto;
+      border-radius: 0 !important;
+      transition: left 0.25s ease;
+      background: rgba(81, 54, 32, 0.97);
+      padding: 1.25rem;
+    }
+    .sidebar.open { left: 0 !important; box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
 
+    /* Overlay sombre derrière le sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 999;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    /* Hamburger visible sur mobile uniquement */
+    .hamburger { display: none; }
+    @media (max-width: 768px) {
+      .hamburger { display: flex !important; }
+      .close-sidebar { display: block !important; }
+    }
+
+    /* Catégories dans le drawer */
+    .sidebar h3 { font-size: 0.95rem; margin-bottom: 1rem; color: #f4e5c2; }
+    .sb-sep {
+      margin: 1rem 0 0.6rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #a07850;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .sb-cat {
+      display: block;
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      background: none;
+      border: none;
+      border-left: 2px solid transparent;
+      border-radius: 0 8px 8px 0;
+      color: #c89b5f;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      margin-bottom: 0.15rem;
+    }
+    .sb-cat:hover { background: rgba(212,165,116,0.12); color: #f4e5c2; }
+    .sb-cat.active {
+      background: rgba(212,165,116,0.18);
+      color: #f4e5c2;
+      border-left-color: #d4a574;
+    }
+
+    /* ── Barre de recherche ── */
+    .search-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .search-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(61,40,23,0.85);
+      border: 1px solid rgba(212,165,116,0.3);
+      border-radius: 10px;
+      padding: 0 0.85rem;
+    }
+    .search-wrap input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: #f4e5c2;
+      font-size: 0.88rem;
+      padding: 0.65rem 0;
+    }
+    .search-wrap input::placeholder { color: #a07850; }
+    .search-ico { color: #c89b5f; font-size: 0.9rem; }
+    .btn-filtres {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0 1rem;
+      background: rgba(212,165,116,0.1);
+      border: 1px solid rgba(212,165,116,0.35);
+      border-radius: 10px;
+      color: #3d2817;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-filtres:hover { background: rgba(212,165,116,0.2); }
+    .btn-filtres .arr { font-size: 0.6rem; transition: transform 0.2s; display: inline-block; }
+    .btn-filtres.open .arr { transform: rotate(180deg); }
+
+    /* ── Panneau filtres ── */
+    .filters-panel {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 0.7rem;
+      background: rgba(61,40,23,0.9);
+      border: 1px solid rgba(212,165,116,0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .filters-panel.open { display: grid; }
+    .fg label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #a07850;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 0.28rem;
+    }
+    .fg select,
+    .fg input[type="number"] {
+      width: 100%;
+      padding: 0.48rem 0.65rem;
+      background: rgba(81,54,32,0.95);
+      border: 1px solid rgba(212,165,116,0.28);
+      border-radius: 8px;
+      color: #f4e5c2;
+      font-size: 0.82rem;
+      outline: none;
+      appearance: none;
+      -moz-appearance: none;
+    }
+    .fg select option { background: #3d2817; }
+    .prix-row { display: flex; align-items: center; gap: 0.3rem; }
+    .prix-row input { flex: 1; }
+    .prix-sep { color: #a07850; font-size: 0.78rem; flex-shrink: 0; }
+    .fg-btns { display: flex; align-items: flex-end; gap: 0.4rem; }
+    .btn-ok {
+      flex: 1; padding: 0.5rem;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      border: none; border-radius: 8px;
+      color: #3d2817; font-weight: 700; font-size: 0.82rem;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-ok:hover { opacity: 0.87; }
+    .btn-reset-f {
+      padding: 0.5rem 0.7rem;
+      background: rgba(220,80,80,0.1);
+      border: 1px solid rgba(220,80,80,0.3);
+      border-radius: 8px;
+      color: #e07070; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-reset-f:hover { background: rgba(220,80,80,0.22); }
+
+    /* ── Tags filtres actifs ── */
+    .active-tags {
+      display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.75rem;
+    }
+    .ftag {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.18rem 0.6rem;
+      background: rgba(212,165,116,0.12);
+      border: 1px solid rgba(212,165,116,0.35);
+      border-radius: 999px;
+      font-size: 0.74rem; color: #d4a574; font-weight: 600;
+    }
+    .ftag button {
+      background: none; border: none; color: #a07850;
+      cursor: pointer; font-size: 0.74rem; padding: 0; line-height: 1;
+    }
+    .ftag button:hover { color: #e07070; }
+  </style>
+</head>
 <body>
 
   <!-- Header -->
   <header>
-    <button class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
-    </button>
-
+  
     <div class="logo gradient-text">REWEAR DZ</div>
-
     <div class="nav-right">
-
-      <!-- 👤 Non connecté (affiché par défaut) -->
       <div class="only-guest" id="guest-nav">
         <a href="pages/login.html" class="nav-btn">Se connecter</a>
         <a href="pages/signin.html" class="nav-btn btn-primary">S'inscrire</a>
       </div>
-
-      <!--  Connecté (caché par défaut, affiché par JS) -->
-     <div class="only-auth" id="auth-nav">
-  <a href="pages/admin/index.html" id="admin-link" style="display:none;" class="nav-btn"> Administration</a>
-  <a href="roles/vendeur/publier.html" class="btn-publish">+ Publier</a>
-  <div class="user-menu">
-
+      <div class="only-auth" id="auth-nav">
+        <a href="pages/admin/index.html" id="admin-link" style="display:none;" class="nav-btn">Administration</a>
+        <a href="roles/vendeur/publier.html" class="btn-publish">+ Publier</a>
+        <div class="user-menu">
           <div class="user-avatar" id="avatar-btn">?</div>
-
           <div class="dropdown" id="dropdown">
             <div class="dropdown-header">
-              <div class="username" id="dd-username">Chargement…</div>
+              <div class="username" id="dd-username">Chargement...</div>
               <div class="user-rating" id="dd-rating"></div>
             </div>
-
             <a href="pages/profile.html"><span class="icon">👤</span> Mon profil</a>
             <a href="pages/myarticles.html"><span class="icon">📦</span> Mes annonces</a>
-
             <button class="dd-item logout-btn" id="logout-btn">
-              <span class="icon">🚪</span> Se déconnecter
+              <span class="icon">🚪</span> Se deconnecter
             </button>
           </div>
         </div>
       </div>
-
     </div>
   </header>
 
+
+  <!-- Container — identique a l'original -->
   <div class="container">
-
-
-
     <div class="main-area">
+
       <div class="category-bar">
-        <button class="category-btn active">Tous</button>
-        <button class="category-btn">Vêtements</button>
-        <button class="category-btn">Chaussures</button>
-        <button class="category-btn">Accessoires</button>
-        <button class="category-btn">Objets</button>
-        <button class="category-btn">Promotions</button>
+        <button class="category-btn active" data-slug="">Tous</button>
+        <button class="category-btn" data-slug="vetements">Vetements</button>
+        <button class="category-btn" data-slug="chaussures">Chaussures</button>
+        <button class="category-btn" data-slug="accessoires">Accessoires</button>
+        <button class="category-btn" data-slug="objets">Objets</button>
+        <button class="category-btn" data-slug="promotions">Promotions</button>
       </div>
+
+      <!-- Barre de recherche -->
+      <div class="search-bar">
+        <div class="search-wrap">
+          <span class="search-ico">&#128269;</span>
+          <input type="text" id="searchInput" placeholder="Rechercher un article..." autocomplete="off">
+        </div>
+        <button class="btn-filtres" id="btnFiltres">
+          Filtres <span class="arr">&#9660;</span>
+        </button>
+      </div>
+
+      <!-- Filtres -->
+      <div class="filters-panel" id="filtersPanel">
+        <div class="fg">
+          <label>Wilaya</label>
+          <select id="fWilaya">
+            <option value="">Toutes</option>
+            <option>Adrar</option><option>Chlef</option><option>Laghouat</option>
+            <option>Oum El Bouaghi</option><option>Batna</option><option>Bejaia</option>
+            <option>Biskra</option><option>Bechar</option><option>Blida</option>
+            <option>Bouira</option><option>Tamanrasset</option><option>Tebessa</option>
+            <option>Tlemcen</option><option>Tiaret</option><option>Tizi Ouzou</option>
+            <option>Alger</option><option>Djelfa</option><option>Jijel</option>
+            <option>Setif</option><option>Saida</option><option>Skikda</option>
+            <option>Sidi Bel Abbes</option><option>Annaba</option><option>Guelma</option>
+            <option>Constantine</option><option>Medea</option><option>Mostaganem</option>
+            <option>M'Sila</option><option>Mascara</option><option>Ouargla</option>
+            <option>Oran</option><option>El Bayadh</option><option>Illizi</option>
+            <option>Bordj Bou Arreridj</option><option>Boumerdes</option><option>El Tarf</option>
+            <option>Tindouf</option><option>Tissemsilt</option><option>El Oued</option>
+            <option>Khenchela</option><option>Souk Ahras</option><option>Tipaza</option>
+            <option>Mila</option><option>Ain Defla</option><option>Naama</option>
+            <option>Ain Temouchent</option><option>Ghardaia</option><option>Relizane</option>
+            <option>Timimoun</option><option>Bordj Badji Mokhtar</option>
+            <option>Ouled Djellal</option><option>Beni Abbes</option><option>In Salah</option>
+            <option>In Guezzam</option><option>Touggourt</option><option>Djanet</option>
+            <option>El M'Ghair</option><option>El Meniaa</option>
+          </select>
+        </div>
+        <div class="fg" id="fgTaille">
+          <label>Taille</label>
+          <select id="fTaille"><option value="">Toutes</option></select>
+        </div>
+        <div class="fg">
+          <label>Etat</label>
+          <select id="fEtat">
+            <option value="">Tous</option>
+            <option value="neuf">Neuf avec etiquette</option>
+            <option value="excellent">Excellent etat</option>
+            <option value="bon">Bon etat</option>
+            <option value="correct">Etat correct</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Prix (DZD)</label>
+          <div class="prix-row">
+            <input type="number" id="fPrixMin" placeholder="Min" min="0" step="100">
+            <span class="prix-sep">&#8211;</span>
+            <input type="number" id="fPrixMax" placeholder="Max" min="0" step="100">
+          </div>
+        </div>
+        <div class="fg fg-btns">
+          <button class="btn-ok" id="btnOk">Appliquer</button>
+          <button class="btn-reset-f" id="btnResetF">Reinit.</button>
+        </div>
+      </div>
+
+      <div class="active-tags" id="activeTags"></div>
 
       <main class="content" id="articles">
         <p id="articlesLoading" class="loading-msg">Chargement des annonces...</p>
         <p id="articlesEmpty" class="empty-msg" style="display:none;">Aucune annonce pour le moment.</p>
       </main>
     </div>
-
   </div>
-
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script/auth.js"></script>
   <script src="script/articles.js"></script>
   <script src="script/script.js"></script>
-  <script>
-(async function() {
-  var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
-  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
-  var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  var { data: { session } } = await client.auth.getSession();
-  if (!session) return;
-
-  try {
-    var payload = session.access_token.split('.')[1];
-    var decoded = JSON.parse(atob(payload));
-    if (decoded.user_role === 'admin') {
-      document.getElementById('admin-link').style.display = 'inline-flex';
-    }
-  } catch(e) {}
-})();
-</script>
 </body>
-
 </html>

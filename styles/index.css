@@ -285,7 +285,7 @@ button.buy-btn:hover { opacity: 0.95; }
   color: #c89b5f;
   padding: 2rem;
 }
-.empty-msg { color: #f4e5c2; }
+.empty-msg { color: #3d2817; }
 
 @media (max-width: 480px) {
   header { padding: 0.5rem 0.75rem; }

@@ -92,9 +92,9 @@ body {
   left: 1rem;
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  background: rgba(212, 165, 116, 0.2);
+  background: #3d2817(212, 165, 116, 0.2);
   border: 1px solid rgba(212, 165, 116, 0.4);
-  color: #d4a574;
+  color: #3d2817;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
