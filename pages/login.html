@@ -39,24 +39,24 @@
     if (el) { el.style.display = 'none'; }
     alert(msg);
   };
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errEl = document.getElementById('loginError');
-    errEl.style.display = 'none';
-    var token = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
-    if (token && window.verifyRecaptcha) {
-      var ok = await window.verifyRecaptcha(token);
-      if (!ok) {
-        errEl.textContent = 'Vérification de sécurité échouée. Cochez la case et réessayez.';
-        errEl.style.display = 'block';
-        return;
-      }
-    }
-    var email = document.getElementById('email').value;
-    var password = document.getElementById('password').value;
-    await login(email, password);
-    if (typeof grecaptcha !== 'undefined' && grecaptcha.reset) grecaptcha.reset();
-  });
+ document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  // ✅ Bloquer si le captcha n'est pas coché
+  var token = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
+  if (!token) {
+    errEl.textContent = 'Veuillez cocher la case reCAPTCHA.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var email    = document.getElementById('email').value;
+  var password = document.getElementById('password').value;
+  await login(email, password);
+  if (typeof grecaptcha !== 'undefined' && grecaptcha.reset) grecaptcha.reset();
+});
 </script>
 
 </body>
