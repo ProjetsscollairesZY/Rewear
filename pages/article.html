@@ -273,7 +273,23 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { border-color: rgba(92, 184, 92, 0.5); }
     .toast.error { border-color: rgba(220, 80, 80, 0.5); color: #e07070; }
-
+.btn-contacter {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  background: rgba(212, 165, 116, 0.15);
+  border: 1px solid rgba(212, 165, 116, 0.4);
+  color: #f4e5c2;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+.btn-contacter:hover { background: rgba(212, 165, 116, 0.28); color: #fff; }
     /* ── LOADING / ERROR ── */
     .page-loading, .page-error { text-align: center; padding: 4rem 1rem; color: #c89b5f; }
     .page-error { color: #e07070; }
@@ -302,6 +318,7 @@
             </div>
             <a href="profile.html"><span class="icon">👤</span> Mon profil</a>
             <a href="myarticles.html"><span class="icon">📦</span> Mes annonces</a>
+            <a href="conversations.html"><span>&#128172;</span> Mes messages</a>
             <button class="dd-item logout-btn" id="logout-btn">
               <span class="icon">🚪</span> Se déconnecter
             </button>
@@ -357,6 +374,7 @@
         <option value="autre">Autre</option>
       </select>
     </div>
+
     <div class="modal-field">
       <label>Commentaire (optionnel)</label>
       <textarea id="repComment" placeholder="Décrivez le problème..." style="width:100%;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid rgba(212,165,116,0.3);background:rgba(255,255,255,0.06);color:#f4e5c2;font-size:0.88rem;resize:vertical;min-height:80px;outline:none;font-family:inherit;"></textarea>
@@ -366,8 +384,12 @@
       <button class="btn-modal-cancel" id="repCancel">Annuler</button>
       <button class="btn-modal-send" id="repSend" style="background:linear-gradient(135deg,#e07070,#f4a0a0);color:#3d1717;">Signaler</button>
     </div>
+    
   </div>
+ 
 </div>
+
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -519,7 +541,10 @@ var interestBtn = isOwn
 var reportBtn = isOwn
   ? ''
   : '<button class="btn-report" id="btnReport">🚩 Signaler le vendeur</button>';
-
+/* Contact button */
+var contactBtn = isOwn
+  ? ''
+  : '<a id="btnContacter" class="btn-contacter" href="chat.html?article_id='+articleId+'&seller_id='+esc(a.seller_id)+'">💬 Contacter le vendeur</a>';
 /* ── Build DOM ── */
 var card = document.createElement('div');
 card.className = 'detail-card';
@@ -538,7 +563,7 @@ card.innerHTML =
     (date ? '<div style="font-size:0.78rem;color:#a07850;">Publié le '+date+'</div>' : '') +
     '<hr class="detail-divider">' +
     '<p class="detail-desc">'+esc(a.description||'Aucune description.')+'</p>' +
-    '<div class="action-btns">'+interestBtn+reportBtn+'</div>' +
+    '<div class="action-btns">'+interestBtn+contactBtn+reportBtn+'</div>' +
   '</div>';
 wrap.appendChild(card);
 
@@ -867,6 +892,7 @@ document.getElementById('repSend').addEventListener('click', function() {
     }
 
   })();
+   
   </script>
 </body>
 </html>

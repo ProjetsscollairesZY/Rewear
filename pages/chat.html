@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - REWEAR DZ</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: radial-gradient(ellipse at top right, #EADBC8, #3E2A1F);
+      color: #f4e5c2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: #3E2A1F;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(212,165,116,0.2);
+    }
+    .btn-back {
+      background: none;
+      border: none;
+      color: #d4a574;
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.25rem;
+      flex-shrink: 0;
+    }
+    .chat-header-info { flex: 1; min-width: 0; }
+    .chat-header-info .with-who {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f4e5c2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-header-info .article-ref {
+      font-size: 0.75rem;
+      color: #c89b5f;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .article-thumb {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(212,165,116,0.3);
+    }
+    .article-thumb-placeholder {
+      width: 42px; height: 42px; border-radius: 8px;
+      background: rgba(81,54,32,0.8);
+      border: 1px solid rgba(212,165,116,0.2);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    /* ── Article banner ── */
+    .article-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(61,40,23,0.7);
+      border-bottom: 1px solid rgba(212,165,116,0.15);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .article-banner:hover { background: rgba(81,54,32,0.7); }
+    .article-banner img {
+      width: 52px; height: 52px;
+      border-radius: 8px; object-fit: cover;
+      border: 1px solid rgba(212,165,116,0.3);
+      flex-shrink: 0;
+    }
+    .article-banner-info .title {
+      font-size: 0.88rem; font-weight: 700; color: #f4e5c2;
+    }
+    .article-banner-info .price {
+      font-size: 0.82rem; color: #d4a574; font-weight: 600;
+    }
+    .article-banner-info .etat {
+      font-size: 0.72rem; color: #a07850;
+    }
+
+    /* ── Messages zone ── */
+    .messages-zone {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .msg-day-sep {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #a07850;
+      margin: 0.5rem 0;
+    }
+
+    /* Bulle message */
+    .msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 72%;
+    }
+    .msg.mine  { align-self: flex-end; align-items: flex-end; }
+    .msg.theirs{ align-self: flex-start; align-items: flex-start; }
+
+    .bubble {
+      padding: 0.6rem 0.9rem;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .msg.mine   .bubble {
+      background: linear-gradient(135deg, #d4a574, #c08050);
+      color: #3d2817;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.theirs .bubble {
+      background: rgba(81,54,32,0.9);
+      color: #f4e5c2;
+      border: 1px solid rgba(212,165,116,0.2);
+      border-bottom-left-radius: 4px;
+    }
+    .msg-meta {
+      font-size: 0.68rem;
+      color: #a07850;
+      margin-top: 0.2rem;
+      padding: 0 0.2rem;
+    }
+    .msg.mine .msg-meta { text-align: right; }
+    .read-tick { color: #d4a574; }
+
+    /* Loading / empty */
+    .zone-loading, .zone-empty {
+      flex: 1; display: flex;
+      align-items: center; justify-content: center;
+      color: #a07850; font-size: 0.9rem; text-align: center;
+    }
+
+    /* ── Input zone ── */
+    .input-zone {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: #3E2A1F;
+      border-top: 1px solid rgba(212,165,116,0.2);
+      position: sticky;
+      bottom: 0;
+    }
+    .msg-input {
+      flex: 1;
+      background: rgba(61,40,23,0.9);
+      border: 1px solid rgba(212,165,116,0.3);
+      border-radius: 24px;
+      padding: 0.6rem 1rem;
+      color: #f4e5c2;
+      font-size: 0.9rem;
+      outline: none;
+      resize: none;
+      max-height: 100px;
+      font-family: inherit;
+      line-height: 1.4;
+    }
+    .msg-input::placeholder { color: #a07850; }
+    .btn-send {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      border: none;
+      color: #3d2817;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+      align-self: flex-end;
+    }
+    .btn-send:hover { opacity: 0.88; }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Non connecté */
+    .not-logged {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1rem; padding: 2rem;
+      text-align: center; color: #c89b5f;
+    }
+    .not-logged a {
+      padding: 0.6rem 1.5rem;
+      background: linear-gradient(135deg, #d4a574, #f4e5c2);
+      border-radius: 999px; color: #3d2817;
+      font-weight: 700; text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="chat-header">
+  <button class="btn-back" id="btnBack">&#8592;</button>
+  <div id="headerThumb" class="article-thumb-placeholder">&#128717;</div>
+  <div class="chat-header-info">
+    <div class="with-who" id="headerWho">Chargement...</div>
+    <div class="article-ref" id="headerArticle"></div>
+  </div>
+</div>
+
+<!-- Banner article cliquable -->
+<div class="article-banner" id="articleBanner" style="display:none;">
+  <img id="bannerImg" src="" alt="article">
+  <div class="article-banner-info">
+    <div class="title" id="bannerTitle">—</div>
+    <div class="price" id="bannerPrice">—</div>
+    <div class="etat"  id="bannerEtat">—</div>
+  </div>
+</div>
+
+<!-- Zone messages -->
+<div class="messages-zone" id="messagesZone">
+  <div class="zone-loading" id="zoneLoading">Chargement...</div>
+</div>
+
+<!-- Input -->
+<div class="input-zone" id="inputZone" style="display:none;">
+  <textarea class="msg-input" id="msgInput" placeholder="Votre message..." rows="1"></textarea>
+  <button class="btn-send" id="btnSend" disabled>&#10148;</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function() {
+  var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
+
+  var client = window.supabaseClient || supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  window.supabaseClient = client;
+
+  /* ── Params URL ── */
+  var params     = new URLSearchParams(window.location.search);
+  var articleId  = params.get('article_id');
+  var sellerId   = params.get('seller_id');
+
+  /* ── Bouton retour ── */
+  document.getElementById('btnBack').addEventListener('click', function() {
+    if (articleId) window.location.href = 'article.html?id=' + articleId;
+    else history.back();
+  });
+
+  /* ── Vérifier connexion ── */
+  var { data: { user } } = await client.auth.getUser();
+  if (!user) {
+    document.getElementById('zoneLoading').style.display = 'none';
+    document.getElementById('messagesZone').innerHTML =
+      '<div class="not-logged">' +
+        '<p>Connectez-vous pour envoyer un message.</p>' +
+        '<a href="login.html">Se connecter</a>' +
+      '</div>';
+    return;
+  }
+
+  var myId = user.id;
+
+  /* ── Vérif : on ne peut pas s'écrire à soi-même ── */
+  if (sellerId === myId) {
+    document.getElementById('zoneLoading').textContent = "Vous ne pouvez pas vous envoyer un message.";
+    return;
+  }
+
+  /* ── Charger l'article ── */
+  var article = null;
+  if (articleId) {
+    var { data: art } = await client.from('articles')
+      .select('id,title,price,etat,images,seller_id')
+      .eq('id', articleId).single();
+    article = art;
+
+    /* Si seller_id pas dans l'URL, le prendre depuis l'article */
+    if (!sellerId && article) sellerId = article.seller_id;
+
+    if (article) {
+      var banner   = document.getElementById('articleBanner');
+      var bannerImg= document.getElementById('bannerImg');
+      banner.style.display = 'flex';
+      document.getElementById('bannerTitle').textContent = article.title || '—';
+      document.getElementById('bannerPrice').textContent = Number(article.price || 0).toLocaleString('fr-DZ') + ' DZD';
+      document.getElementById('bannerEtat').textContent  = article.etat || '';
+      if (article.images && article.images[0]) {
+        bannerImg.src = article.images[0];
+        /* Header thumb */
+        var th = document.getElementById('headerThumb');
+        th.outerHTML = '<img id="headerThumb" class="article-thumb" src="' + article.images[0] + '" alt="">';
+      }
+      document.getElementById('headerArticle').textContent = article.title || '';
+      banner.addEventListener('click', function() {
+        window.location.href = 'article.html?id=' + article.id;
+      });
+    }
+  }
+
+  /* ── Charger le profil de l'autre personne ── */
+  if (sellerId) {
+    var { data: prof } = await client.from('profiles')
+      .select('username').eq('id', sellerId).single();
+    document.getElementById('headerWho').textContent =
+      (prof && prof.username) ? prof.username : 'Vendeur';
+  }
+
+  /* ── Déterminer receiver ── */
+  var receiverId = sellerId;
+  if (!receiverId) {
+    document.getElementById('zoneLoading').textContent = 'Destinataire introuvable.';
+    return;
+  }
+
+  /* ── Afficher input ── */
+  document.getElementById('inputZone').style.display = 'flex';
+  document.getElementById('zoneLoading').style.display = 'none';
+
+  /* ── Charger historique messages ── */
+  var messagesZone = document.getElementById('messagesZone');
+  var allMessages  = [];
+
+  async function chargerMessages() {
+    var { data, error } = await client.from('messages')
+      .select('*')
+      .or(
+        'and(sender_id.eq.' + myId + ',receiver_id.eq.' + receiverId + '),' +
+        'and(sender_id.eq.' + receiverId + ',receiver_id.eq.' + myId + ')'
+      )
+      .eq('article_id', articleId)
+      .order('created_at', { ascending: true });
+
+    if (error) { console.error(error); return; }
+    allMessages = data || [];
+    renderMessages();
+
+    /* Marquer les messages reçus comme lus */
+    var unread = allMessages.filter(function(m) { return m.receiver_id === myId && !m.read; });
+    if (unread.length > 0) {
+      var ids = unread.map(function(m) { return m.id; });
+      await client.from('messages').update({ read: true }).in('id', ids);
+    }
+  }
+
+  /* ── Render messages ── */
+  function renderMessages() {
+    messagesZone.innerHTML = '';
+    if (allMessages.length === 0) {
+      messagesZone.innerHTML = '<div class="zone-empty">Demarrez la conversation !</div>';
+      return;
+    }
+
+    var lastDay = '';
+    allMessages.forEach(function(m) {
+      var date = new Date(m.created_at);
+      var day  = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      if (day !== lastDay) {
+        var sep = document.createElement('div');
+        sep.className = 'msg-day-sep';
+        sep.textContent = day;
+        messagesZone.appendChild(sep);
+        lastDay = day;
+      }
+
+      var isMine = m.sender_id === myId;
+      var div = document.createElement('div');
+      div.className = 'msg ' + (isMine ? 'mine' : 'theirs');
+      div.innerHTML =
+        '<div class="bubble">' + escHtml(m.content) + '</div>' +
+        '<div class="msg-meta">' +
+          date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) +
+          (isMine ? ' <span class="read-tick">' + (m.read ? '&#10003;&#10003;' : '&#10003;') + '</span>' : '') +
+        '</div>';
+      messagesZone.appendChild(div);
+    });
+
+    /* Scroller en bas */
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+  }
+
+  function escHtml(str) {
+    return String(str || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  await chargerMessages();
+
+  /* ── Supabase Realtime ── */
+  client.channel('chat-' + articleId + '-' + [myId, receiverId].sort().join('-'))
+    .on('postgres_changes', {
+      event:  'INSERT',
+      schema: 'public',
+      table:  'messages',
+      filter: 'article_id=eq.' + articleId
+    }, async function(payload) {
+      var m = payload.new;
+      /* Vérifier que le message concerne cette conversation */
+      var concernsMe =
+        (m.sender_id === myId   && m.receiver_id === receiverId) ||
+        (m.sender_id === receiverId && m.receiver_id === myId);
+      if (!concernsMe) return;
+
+      /* Éviter les doublons (message déjà ajouté par l'envoi local) */
+      var existe = allMessages.find(function(x) { return x.id === m.id; });
+      if (!existe) {
+        allMessages.push(m);
+        renderMessages();
+      }
+
+      /* Marquer lu si c'est pour moi */
+      if (m.receiver_id === myId && !m.read) {
+        await client.from('messages').update({ read: true }).eq('id', m.id);
+      }
+    })
+    .subscribe();
+
+  /* ── Envoyer un message ── */
+  var msgInput = document.getElementById('msgInput');
+  var btnSend  = document.getElementById('btnSend');
+
+  msgInput.addEventListener('input', function() {
+    btnSend.disabled = msgInput.value.trim() === '';
+    /* Auto-resize */
+    msgInput.style.height = 'auto';
+    msgInput.style.height = Math.min(msgInput.scrollHeight, 100) + 'px';
+  });
+
+  msgInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!btnSend.disabled) envoyer();
+    }
+  });
+
+  btnSend.addEventListener('click', envoyer);
+
+  async function envoyer() {
+    var content = msgInput.value.trim();
+    if (!content) return;
+    btnSend.disabled = true;
+    msgInput.value   = '';
+    msgInput.style.height = 'auto';
+
+    var newMsg = {
+      sender_id:   myId,
+      receiver_id: receiverId,
+      article_id:  articleId,
+      content:     content,
+      read:        false
+    };
+
+    var { data, error } = await client.from('messages').insert(newMsg).select().single();
+    if (error) { console.error(error); btnSend.disabled = false; return; }
+
+    /* Ajouter localement pour réponse instantanée */
+    allMessages.push(data);
+    renderMessages();
+    btnSend.disabled = false;
+  }
+
+})();
+</script>
+</body>
+</html>
