@@ -30,14 +30,15 @@ if (typeof window !== 'undefined') window.verifyRecaptcha = verifyRecaptcha;
 async function signup(email, password, username) {
   try {
     const { data, error } = await supabaseClient.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: {
-          username: username
-        }
-      }
-    });
+  email: email,
+  password: password,
+  options: {
+    emailRedirectTo: 'https://reweardz.store/pages/login.html', // ✅ Ajouter cette ligne
+    data: {
+      username: username
+    }
+  }
+});
 
     if (error) {
       if (typeof window !== 'undefined' && window.showAuthError) window.showAuthError(error.message);
