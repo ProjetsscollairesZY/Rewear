@@ -56,6 +56,11 @@
       return;
     }
     var token = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
+    if (!token) {
+      errEl.textContent = 'Veuillez cocher la case reCAPTCHA.';
+      errEl.style.display = 'block';
+      return;
+    }
     if (token && window.verifyRecaptcha) {
       var ok = await window.verifyRecaptcha(token);
       if (!ok) {
