@@ -5,107 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Signalements - Admin REWEAR DZ</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: sans-serif;   background: radial-gradient(ellipse at top right, #EADBC8, #3E2A1F);
- color: #f4e5c2; min-height: 100vh; }
-    .admin-layout { display: flex; min-height: 100vh; }
-    .sidebar {
-      width: 220px; background: rgba(61,40,23,0.95);
-      border-right: 1px solid rgba(212,165,116,0.2);
-      padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;
-    }
-    .sidebar-logo {
-      font-size: 1rem; font-weight: 800;
-      background: linear-gradient(135deg, #d4a574, #f4e5c2);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; margin-bottom: 1.5rem; padding-left: 0.5rem;
-    }
-    .nav-item {
-      display: flex; align-items: center; gap: 0.6rem;
-      padding: 0.6rem 0.75rem; border-radius: 8px; text-decoration: none;
-      color: #c89b5f; font-size: 0.88rem; font-weight: 600;
-      transition: 0.2s; border: 1px solid transparent;
-    }
-    .nav-item:hover { background: rgba(212,165,116,0.12); color: #f4e5c2; }
-    .nav-item.active { background: rgba(212,165,116,0.18); color: #f4e5c2; border-color: rgba(212,165,116,0.3); }
-    .sidebar-bottom { margin-top: auto; }
-    .btn-logout-admin {
-      width: 100%; padding: 0.6rem; border-radius: 8px;
-      background: rgba(220,80,80,0.1); border: 1px solid rgba(220,80,80,0.3);
-      color: #e07070; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s;
-    }
-    .btn-logout-admin:hover { background: rgba(220,80,80,0.22); }
-    .admin-main { flex: 1; padding: 2rem; overflow-y: auto; }
-    .admin-main h1 {
-      color:#3E2A1F;
-      font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, #3E2A1F, #f4e5c2);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-
-    /* ── TABLE ── */
-    .table-wrap {
-      background: rgba(61,40,23,0.75);
-      border: 1px solid rgba(212,165,116,0.2);
-      border-radius: 14px; overflow: hidden; backdrop-filter: blur(6px);
-    }
-    table { width: 100%; border-collapse: collapse; }
-    thead { background: rgba(81,54,32,0.8); }
-    th {
-      padding: 0.85rem 1rem; text-align: left;
-      font-size: 0.78rem; font-weight: 700; color: #c89b5f;
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    td { padding: 0.85rem 1rem; font-size: 0.85rem; border-top: 1px solid rgba(212,165,116,0.1); }
-    tr:hover td { background: rgba(212,165,116,0.05); }
-    .badge-motif {
-      display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
-      font-size: 0.72rem; font-weight: 700;
-      background: rgba(220,80,80,0.15); border: 1px solid rgba(220,80,80,0.35); color: #e07070;
-    }
-    .badge-traite {
-      background: rgba(92,184,92,0.15); border-color: rgba(92,184,92,0.35); color: #7dd87d;
-    }
-    .btn-action {
-      padding: 0.3rem 0.75rem; border-radius: 8px; font-size: 0.75rem;
-      font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
-    }
-    .btn-traite { background: rgba(92,184,92,0.12); border-color: rgba(92,184,92,0.3); color: #7dd87d; }
-    .btn-traite:hover { background: rgba(92,184,92,0.25); }
-    .btn-delete { background: rgba(220,80,80,0.12); border-color: rgba(220,80,80,0.3); color: #e07070; }
-    .btn-delete:hover { background: rgba(220,80,80,0.25); }
-    .actions-cell { display: flex; gap: 0.4rem; }
-    .loading-msg { text-align: center; color: #c89b5f; padding: 2rem; }
-    .empty-msg { text-align: center; color: #a07850; padding: 2rem; }
-
-    /* ── FILTERS ── */
-    .filters {
-      display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;
-    }
-    .filter-select {
-      padding: 0.4rem 0.85rem; border-radius: 8px;
-      border: 1px solid rgba(212,165,116,0.3);
-      background: rgba(61,40,23,0.8); color: #f4e5c2;
-      font-size: 0.82rem; outline: none; cursor: pointer;
-    }
-    .count-label { font-size: 0.82rem; color: #3E2A1F; margin-left: auto; }
-
-    /* ── TOAST ── */
-    .toast {
-      position: fixed; bottom: 1.5rem; right: 1.5rem;
-      background: rgba(61,40,23,0.97); border: 1px solid rgba(212,165,116,0.4);
-      border-radius: 10px; padding: 0.75rem 1.25rem; color: #f4e5c2;
-      font-size: 0.875rem; font-weight: 600; z-index: 9999;
-      transform: translateY(80px); opacity: 0; transition: 0.3s; pointer-events: none;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { border-color: rgba(92,184,92,0.5); }
-    .toast.error { border-color: rgba(220,80,80,0.5); color: #e07070; }
-  </style>
+  <link rel="stylesheet" href="styles/signalements.css">
 </head>
 <body>
-
 <div class="admin-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">⚙️ Admin Panel</div>
@@ -120,9 +22,10 @@
   </aside>
 
   <main class="admin-main">
-    <h1 style="color:#3E2A1F">🚩 Signalements</h1>
+    <h1>🚩 Signalements</h1>
 
     <div class="filters">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Rechercher...">
       <select class="filter-select" id="filterMotif">
         <option value="">Tous les motifs</option>
         <option value="arnaque">Arnaque</option>
@@ -139,6 +42,7 @@
         <thead>
           <tr>
             <th>Vendeur signalé</th>
+            <th>Signalé par</th>
             <th>Motif</th>
             <th>Commentaire</th>
             <th>Date</th>
@@ -146,11 +50,24 @@
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr><td colspan="5" class="loading-msg">Chargement...</td></tr>
+          <tr><td colspan="6" class="loading-msg">Chargement...</td></tr>
         </tbody>
       </table>
     </div>
   </main>
+</div>
+
+<!-- Modal ban -->
+<div class="modal-bg" id="modalBan">
+  <div class="modal">
+    <h3>🚫 Bannir ce vendeur</h3>
+    <label>Raison du ban</label>
+    <textarea id="banReason" placeholder="Ex: arnaque confirmée, faux compte..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-confirm-ban" id="btnConfirmBan">Bannir définitivement</button>
+      <button class="btn-cancel" id="btnCancelBan">Annuler</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>

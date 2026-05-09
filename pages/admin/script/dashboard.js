@@ -27,7 +27,7 @@
       client.auth.signOut().then(function () {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '../index.html';
+        window.location.href = '../../index.html';
       });
     });
   }, 300);

@@ -242,3 +242,6 @@
   });
 
 })();
+if(user.is_banned){
+   window.location.href = '../error.html';
+}

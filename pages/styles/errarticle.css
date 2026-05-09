@@ -1,0 +1,145 @@
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a0f05;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Ambient circles (same style as error.css) ── */
+    .circle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.18;
+      filter: blur(80px);
+    }
+    .circle1 {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, #d4a574, transparent 70%);
+      top: -160px; left: -160px;
+    }
+    .circle2 {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, #8b5e3c, transparent 70%);
+      bottom: -120px; right: -120px;
+    }
+
+    /* ── Card ── */
+    .error-box {
+      position: relative;
+      z-index: 10;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(212,165,116,0.18);
+      border-radius: 20px;
+      padding: 3rem 2.8rem;
+      max-width: 480px;
+      width: 92%;
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    /* ── Icon ── */
+    .error-icon {
+      font-size: 4.5rem;
+      display: block;
+      margin-bottom: 1.2rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    /* ── Code pill ── */
+    .error-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #d4a574;
+      background: rgba(212,165,116,0.12);
+      border: 1px solid rgba(212,165,116,0.25);
+      border-radius: 999px;
+      padding: 0.3rem 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    /* ── Heading ── */
+    .error-title {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #f4e5c2;
+      margin-bottom: 0.75rem;
+      line-height: 1.25;
+    }
+
+    .error-text {
+      font-size: 0.92rem;
+      color: #a07850;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(212,165,116,0.12);
+      margin-bottom: 2rem;
+    }
+
+    /* ── Buttons ── */
+    .btns {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn:hover  { opacity: 0.88; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-home {
+      background: linear-gradient(135deg, #d4a574, #b8825a);
+      color: #1a0f05;
+    }
+    .btn-back {
+      background: transparent;
+      border: 1px solid rgba(212,165,116,0.35);
+      color: #d4a574;
+    }
+
+    /* ── Branding ── */
+    .brand {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: rgba(160,120,80,0.5);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .brand span {
+      background: linear-gradient(90deg, #d4a574, #f4e5c2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  

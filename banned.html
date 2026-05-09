@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compte suspendu - REWEAR DZ</title>
+  <link rel="stylesheet" href="styles/banned.css">
+</head>
+<body>
+  <div class="circle circle1"></div>
+  <div class="circle circle2"></div>
+
+  <div class="error-box">
+    <div class="ban-icon">🚫</div>
+    <div class="error-code">BANNI</div>
+    <h1 class="error-title">Compte suspendu</h1>
+    <p class="error-text">
+      Votre compte a été suspendu définitivement par l'équipe REWEAR DZ
+      suite à une violation de nos conditions d'utilisation.
+    </p>
+    <div class="ban-reason-box" id="reasonBox">
+      <span>Raison :</span> <span id="reasonText"></span>
+    </div>
+    <div class="btns">
+      <a href="mailto:contact@reweardz.store" class="btn btn-contact">📧 Contacter le support</a>
+      <button class="btn btn-logout" id="btnLogout">Se déconnecter</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Afficher la raison si passée en query param
+    var params = new URLSearchParams(window.location.search);
+    var reason = params.get('reason');
+    if (reason) {
+      document.getElementById('reasonText').textContent = decodeURIComponent(reason);
+      document.getElementById('reasonBox').style.display = 'block';
+    }
+
+    // Déconnexion
+    document.getElementById('btnLogout').addEventListener('click', async function() {
+      var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
+      var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
+      var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      await client.auth.signOut();
+      localStorage.clear();
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

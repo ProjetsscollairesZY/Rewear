@@ -55,7 +55,7 @@
       tbody.innerHTML = '';
       data.forEach(function (u) {
         var isBanned      = !!u.is_banned;
-        var role          = u.role || 'user';
+        var role = u.role || 'user';
         var isCurrentUser = u.id === window.adminUser.id;
         var isAdmin       = role === 'admin';
 
@@ -89,7 +89,9 @@
               '<div>' + (u.username || 'Sans nom') + '</div>' +
               (isBanned && u.ban_reason ? '<div style="font-size:0.72rem;color:#e07070;margin-top:0.15rem;">' + u.ban_reason + '</div>' : '') +
             '</div>' +
+            
           '</div></td>' +
+          '<td style="color:#c89b5f;">' + (u.email || '—') + '</td>' +
           '<td style="color:#c89b5f;">' + (u.phone || '—') + '</td>' +
           '<td style="color:#c89b5f;">' + (u.instagram ? '@' + u.instagram : '—') + '</td>' +
           '<td><span class="badge-role ' + badgeClass + '">' + badgeLabel + '</span></td>' +
@@ -129,37 +131,41 @@
     }
 
     /* ── BAN permanent ── */
-    function bannir(u, reason) {
-      var now = new Date().toISOString();
+function bannir(u, reason) {
+  var now = new Date().toISOString();
 
-      /* 1. Marquer is_banned dans profiles */
-      client.from('profiles')
-        .update({ is_banned: true, ban_reason: reason, banned_at: now })
-        .eq('id', u.id)
-        .then(function (r1) {
-          if (r1.error) { showToast('Erreur : ' + r1.error.message, 'error'); return; }
+  var updateProfile = client.from('profiles')
+    .update({ is_banned: true, ban_reason: reason, banned_at: now })
+    .eq('id', u.id);
 
-          /* 2. Enregistrer phone + instagram dans banned_identifiers */
-          var record = {
-            user_id:   u.id,
-            username:  u.username  || null,
-            phone:     u.phone     || null,
-            instagram: u.instagram || null,
-            reason:    reason,
-            banned_at: now
-          };
-          client.from('banned_identifiers').insert(record).then(function (r2) {
-            if (r2.error) { showToast('Ban partiel (identifiants non enregistres).', 'error'); return; }
-            showToast((u.username || 'Utilisateur') + ' banni definitivement.', 'success');
-            /* Mettre a jour le cache local */
-            allData = allData.map(function (x) {
-              if (x.id !== u.id) return x;
-              return Object.assign({}, x, { is_banned: true, ban_reason: reason, banned_at: now });
-            });
-            render(filtered());
-          });
-        });
-    }
+  var upsertBanned = client.from('banned_identifiers')
+    .upsert({
+      user_id:   u.id,
+      username:  u.username  || null,
+      phone:     u.phone     || null,
+      instagram: u.instagram || null,
+      reason:    reason,
+      banned_at: now
+    }, { onConflict: 'user_id' });
+
+  // Les 2 appels en même temps
+  Promise.all([updateProfile, upsertBanned])
+    .then(function (results) {
+      var err = results.find(function(r) { return r.error; });
+      if (err) { showToast('Erreur : ' + err.error.message, 'error'); return; }
+
+      showToast((u.username || 'Utilisateur') + ' banni définitivement.', 'success');
+      allData = allData.map(function (x) {
+        if (x.id !== u.id) return x;
+        return Object.assign({}, x, { is_banned: true, ban_reason: reason, banned_at: now });
+      });
+      render(filtered());
+    })
+    .catch(function(err) {
+      showToast('Erreur inattendue.', 'error');
+      console.error(err);
+    });
+}
 
     /* ── DEBAN ── */
     function debannir(u) {
@@ -181,14 +187,15 @@
     }
 
     /* ── SUPPRIMER ── */
-    function supprimerUser(u) {
-      client.from('profiles').delete().eq('id', u.id).then(function (r) {
-        if (r.error) { showToast('Erreur : ' + r.error.message, 'error'); return; }
-        showToast('Utilisateur supprime.', 'success');
-        allData = allData.filter(function (x) { return x.id !== u.id; });
-        render(filtered());
-      });
-    }
+   function supprimerUser(u) {
+  client.rpc('delete_user_completely', { target_user_id: u.id })
+    .then(function(r) {
+      if (r.error) { showToast('Erreur : ' + r.error.message, 'error'); return; }
+      showToast('Utilisateur supprimé.', 'success');
+      allData = allData.filter(function(x) { return x.id !== u.id; });
+      render(filtered());
+    });
+}
 
     /* ── Modal ban — confirmer ── */
     document.getElementById('btnConfirmBan').addEventListener('click', function () {
@@ -210,13 +217,18 @@
     filterEl.addEventListener('change', function () { render(filtered()); });
 
     /* ── Charger les utilisateurs ── */
-    client.from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(function (r) {
-        allData = r.data || [];
-        render(allData);
-      });
+    client.from('admin_users')
+  .select('*')
+  .order('created_at', { ascending: false })
+  .then(function (r) {
+    if (r.error) {
+      showToast(r.error.message, 'error');
+      return;
+    }
+
+    allData = r.data || [];
+    render(allData);
+  });
 
     /* ── Logout ── */
     document.getElementById('btnLogout').addEventListener('click', function () {

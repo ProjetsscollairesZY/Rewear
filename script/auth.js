@@ -64,46 +64,47 @@ async function signup(email, password, username) {
 async function login(email, password) {
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
+      email, password
     });
 
     if (error) {
-      if (typeof window !== 'undefined' && window.showAuthError) window.showAuthError(error.message || 'Email ou mot de passe incorrect');
+      if (window.showAuthError) window.showAuthError(error.message);
       else alert('❌ Email ou mot de passe incorrect');
       return false;
     }
 
-    //  Sauvegarder session dans localStorage
+    // Vérifier si banni
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('is_banned, ban_reason, profile_completed')
+      .eq('id', data.user.id)
+      .single();
+
+    console.log('USER ID:', data.user.id);
+    console.log('PROFILE:', profile);
+    console.log('PROFILE ERROR:', profileError);
+    console.log('IS BANNED:', profile?.is_banned);
+
+    if (profile && profile.is_banned) {
+      await supabaseClient.auth.signOut();
+      localStorage.clear();
+      var reason = encodeURIComponent(profile.ban_reason || '');
+      window.location.href = './banned.html?reason=' + reason;
+      return false;
+    }
+
+    // Session normale
     localStorage.setItem('token', data.session.access_token);
     localStorage.setItem('user', JSON.stringify({
       id: data.user.id,
       username: data.user.user_metadata.username || null,
-      prenom: data.user.user_metadata.prenom || null,
-      nom: data.user.user_metadata.nom || null
     }));
 
-    // 🔹 Vérifier si profil complété
-    const { data: userData, error: userError } = await supabaseClient
-      .from('users')
-      .select('profile_completed')
-      .eq('id', data.user.id)
-      .single();
-
-    if (userError) {
-      console.error(userError);
-    }
-
-    if (userData && userData.profile_completed === false) {
-      if (typeof window !== 'undefined' && window.showAuthSuccess) window.showAuthSuccess('Complétez votre profil.');
-      else alert('✅ Connexion réussie ! Complétez votre profil.');
+    if (profile && profile.profile_completed === false) {
       window.location.href = './complete.html';
     } else {
-      if (typeof window !== 'undefined' && window.showAuthSuccess) window.showAuthSuccess('Connexion réussie.');
-      else alert('✅ Connexion réussie !');
       window.location.href = '../index.html';
     }
-
     return true;
 
   } catch (err) {
@@ -112,7 +113,6 @@ async function login(email, password) {
     return false;
   }
 }
-
 
 // ==============================
 // DECONNEXION
@@ -197,6 +197,27 @@ function updateNav(user) {
 
 async function initAuth() {
   const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (user) {
+    // Vérifier le ban à chaque chargement de page
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('is_banned, ban_reason')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && profile.is_banned) {
+      await supabaseClient.auth.signOut();
+      localStorage.clear();
+      var reason = encodeURIComponent(profile.ban_reason || '');
+      // Adapter le chemin selon la page actuelle
+      var isInSubfolder = window.location.pathname.includes('/pages/') ||
+                          window.location.pathname.includes('/roles/');
+      window.location.href = (isInSubfolder ? '' : '') + 'banned.html?reason=' + reason;
+      return;
+    }
+  }
+
   updateNav(user);
   if (!user) console.log("Non connecté");
   else console.log("Connecté :", user.email);

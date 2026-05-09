@@ -5,148 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Utilisateurs - Admin REWEAR DZ</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: sans-serif; background: radial-gradient(ellipse at top right, #EADBC8, #3E2A1F); color: #f4e5c2; min-height: 100vh; }
-    .admin-layout { display: flex; min-height: 100vh; }
-    .sidebar {
-      width: 220px; background: rgba(61,40,23,0.95);
-      border-right: 1px solid rgba(212,165,116,0.2);
-      padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;
-    }
-    .sidebar-logo {
-      font-size: 1rem; font-weight: 800;
-      background: linear-gradient(135deg, #d4a574, #f4e5c2);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; margin-bottom: 1.5rem; padding-left: 0.5rem;
-    }
-    .nav-item {
-      display: flex; align-items: center; gap: 0.6rem;
-      padding: 0.6rem 0.75rem; border-radius: 8px; text-decoration: none;
-      color: #c89b5f; font-size: 0.88rem; font-weight: 600;
-      transition: 0.2s; border: 1px solid transparent;
-    }
-    .nav-item:hover { background: rgba(212,165,116,0.12); color: #f4e5c2; }
-    .nav-item.active { background: rgba(212,165,116,0.18); color: #f4e5c2; border-color: rgba(212,165,116,0.3); }
-    .sidebar-bottom { margin-top: auto; }
-    .btn-logout-admin {
-      width: 100%; padding: 0.6rem; border-radius: 8px;
-      background: rgba(220,80,80,0.1); border: 1px solid rgba(220,80,80,0.3);
-      color: #e07070; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s;
-    }
-    .btn-logout-admin:hover { background: rgba(220,80,80,0.22); }
-    .admin-main { flex: 1; padding: 2rem; overflow-y: auto; }
-    .admin-main h1 {
-      font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, #d4a574, #f4e5c2);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
-    .search-input {
-      padding: 0.4rem 0.85rem; border-radius: 8px;
-      border: 1px solid rgba(212,165,116,0.3);
-      background: rgba(61,40,23,0.8); color: #f4e5c2;
-      font-size: 0.82rem; outline: none; width: 220px;
-    }
-    .filter-select {
-      padding: 0.4rem 0.85rem; border-radius: 8px;
-      border: 1px solid rgba(212,165,116,0.3);
-      background: rgba(61,40,23,0.8); color: #f4e5c2;
-      font-size: 0.82rem; outline: none; cursor: pointer;
-    }
-    .count-label { font-size: 0.82rem; color: #a07850; margin-left: auto; }
-    .table-wrap {
-      background: rgba(61,40,23,0.75);
-      border: 1px solid rgba(212,165,116,0.2);
-      border-radius: 14px; overflow: hidden; backdrop-filter: blur(6px);
-      overflow-x: auto;
-    }
-    table { width: 100%; border-collapse: collapse; min-width: 700px; }
-    thead { background: rgba(81,54,32,0.8); }
-    th {
-      padding: 0.85rem 1rem; text-align: left;
-      font-size: 0.78rem; font-weight: 700; color: #c89b5f;
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    td { padding: 0.85rem 1rem; font-size: 0.85rem; border-top: 1px solid rgba(212,165,116,0.1); }
-    tr:hover td { background: rgba(212,165,116,0.05); }
-    tr.banned-row td { background: rgba(220,80,80,0.06); }
-    .badge-role {
-      display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
-      font-size: 0.72rem; font-weight: 700;
-    }
-    .badge-admin { background: rgba(212,165,116,0.2); border: 1px solid rgba(212,165,116,0.5); color: #d4a574; }
-    .badge-user  { background: rgba(92,184,92,0.15);  border: 1px solid rgba(92,184,92,0.35);  color: #7dd87d; }
-    .badge-banni { background: rgba(220,80,80,0.2);   border: 1px solid rgba(220,80,80,0.5);   color: #e07070; }
-    .avatar-sm {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: linear-gradient(135deg, #d4a574, #f4e5c2);
-      color: #3d2817; font-weight: 800; font-size: 0.85rem;
-      display: inline-flex; align-items: center; justify-content: center;
-    }
-    .avatar-sm.banned { background: rgba(220,80,80,0.4); color: #e07070; }
-    .user-cell { display: flex; align-items: center; gap: 0.6rem; }
-    .btn-action {
-      padding: 0.3rem 0.75rem; border-radius: 8px; font-size: 0.75rem;
-      font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
-    }
-    .btn-ban    { background: rgba(220,130,0,0.12);  border-color: rgba(220,130,0,0.35);  color: #e08020; }
-    .btn-ban:hover    { background: rgba(220,130,0,0.25); }
-    .btn-unban  { background: rgba(92,184,92,0.12);  border-color: rgba(92,184,92,0.35);  color: #7dd87d; }
-    .btn-unban:hover  { background: rgba(92,184,92,0.25); }
-    .btn-delete { background: rgba(220,80,80,0.12);  border-color: rgba(220,80,80,0.3);   color: #e07070; }
-    .btn-delete:hover { background: rgba(220,80,80,0.25); }
-    .actions-cell { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-    .loading-msg { text-align: center; color: #c89b5f; padding: 2rem; }
-    .empty-msg   { text-align: center; color: #a07850; padding: 2rem; }
-    .toast {
-      position: fixed; bottom: 1.5rem; right: 1.5rem;
-      background: rgba(61,40,23,0.97); border: 1px solid rgba(212,165,116,0.4);
-      border-radius: 10px; padding: 0.75rem 1.25rem; color: #f4e5c2;
-      font-size: 0.875rem; font-weight: 600; z-index: 9999;
-      transform: translateY(80px); opacity: 0; transition: 0.3s; pointer-events: none;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { border-color: rgba(92,184,92,0.5); }
-    .toast.error   { border-color: rgba(220,80,80,0.5); color: #e07070; }
-
-    /* Modal ban */
-    .modal-bg {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6); z-index: 2000;
-      align-items: center; justify-content: center;
-    }
-    .modal-bg.open { display: flex; }
-    .modal {
-      background: rgba(61,40,23,0.99);
-      border: 1px solid rgba(212,165,116,0.3);
-      border-radius: 14px; padding: 1.5rem;
-      width: 380px; max-width: 90vw;
-    }
-    .modal h3 { color: #f4e5c2; margin-bottom: 1rem; font-size: 1rem; }
-    .modal label { display: block; font-size: 0.75rem; color: #a07850; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem; }
-    .modal textarea {
-      width: 100%; padding: 0.6rem 0.75rem;
-      background: rgba(81,54,32,0.9); border: 1px solid rgba(212,165,116,0.3);
-      border-radius: 8px; color: #f4e5c2; font-size: 0.85rem;
-      outline: none; resize: vertical; min-height: 80px; font-family: inherit;
-    }
-    .modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
-    .btn-confirm-ban {
-      flex: 1; padding: 0.6rem;
-      background: rgba(220,80,80,0.2); border: 1px solid rgba(220,80,80,0.5);
-      border-radius: 8px; color: #e07070; font-weight: 700; font-size: 0.85rem;
-      cursor: pointer; transition: 0.2s;
-    }
-    .btn-confirm-ban:hover { background: rgba(220,80,80,0.35); }
-    .btn-cancel {
-      padding: 0.6rem 1rem;
-      background: rgba(212,165,116,0.1); border: 1px solid rgba(212,165,116,0.3);
-      border-radius: 8px; color: #c89b5f; font-size: 0.85rem; font-weight: 600;
-      cursor: pointer; transition: 0.2s;
-    }
-    .btn-cancel:hover { background: rgba(212,165,116,0.2); }
-  </style>
+ <link rel="stylesheet" href="styles/users.css">
 </head>
 <body>
 
@@ -178,18 +37,19 @@
 
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>Utilisateur</th>
-            <th>Telephone</th>
-            <th>Instagram</th>
-            <th>Statut</th>
-            <th>Inscrit le</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+  <thead>
+  <tr>
+    <th>Utilisateur</th>
+    <th>Email</th>
+    <th>Telephone</th>
+    <th>Instagram</th>
+    <th>Statut</th>
+    <th>Inscrit le</th>
+    <th>Actions</th>
+  </tr>
+</thead>
         <tbody id="tableBody">
-          <tr><td colspan="6" class="loading-msg">Chargement...</td></tr>
+          <tr><td colspan="7" class="loading-msg">Chargement...</td></tr>
         </tbody>
       </table>
     </div>

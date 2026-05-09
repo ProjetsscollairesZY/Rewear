@@ -45,13 +45,12 @@
   errEl.style.display = 'none';
 
   // ✅ Bloquer si le captcha n'est pas coché
-  var token = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
+ var token = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
   if (!token) {
     errEl.textContent = 'Veuillez cocher la case reCAPTCHA.';
     errEl.style.display = 'block';
     return;
   }
-
   var email    = document.getElementById('email').value;
   var password = document.getElementById('password').value;
   await login(email, password);

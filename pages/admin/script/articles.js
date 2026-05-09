@@ -61,7 +61,7 @@
 
         /* Voir l'article */
         tr.querySelector('.btn-view').addEventListener('click', function () {
-          window.open('../pages/article.html?id=' + a.id, '_blank');
+          window.open('../article.html?id=' + a.id, '_blank');
         });
 
         /* Toggle actif */
@@ -76,16 +76,32 @@
         });
 
         /* Supprimer */
-        tr.querySelector('.btn-delete').addEventListener('click', function () {
-          if (!confirm('Supprimer cette annonce définitivement ?')) return;
-          client.from('articles').delete().eq('id', a.id)
-            .then(function (r) {
-              if (r.error) { showToast('Erreur.', 'error'); return; }
-              showToast('Annonce supprimée.', 'success');
-              allData = allData.filter(function (x) { return x.id !== a.id; });
-              render(filtered());
-            });
-        });
+     tr.querySelector('.btn-delete').addEventListener('click', function () {
+  if (!confirm('Supprimer cette annonce définitivement ?')) return;
+
+  var id = a.id;
+
+  // 1. Supprimer toutes les données liées d'abord
+  Promise.all([
+    client.from('favorites').delete().eq('article_id', id),
+    client.from('purchase_interest').delete().eq('article_id', id),
+    client.from('messages').delete().eq('article_id', id),
+  ])
+  .then(function () {
+    // 2. Supprimer l'article
+    return client.from('articles').delete().eq('id', id);
+  })
+  .then(function (r) {
+    if (r.error) { showToast('Erreur : ' + r.error.message, 'error'); return; }
+    showToast('Annonce supprimée.', 'success');
+    allData = allData.filter(function (x) { return x.id !== id; });
+    render(filtered());
+  })
+  .catch(function (err) {
+    showToast('Erreur inattendue.', 'error');
+    console.error(err);
+  });
+});
 
         tbody.appendChild(tr);
       });

@@ -11,7 +11,7 @@
   var { data: { session } } = await client.auth.getSession();
 
   if (!session) {
-    window.location.href = '../index.html';
+    window.location.href = '../../index.html';
     return;
   }
 
@@ -21,7 +21,7 @@
     var userRole = decoded.user_role || 'user';
 
     if (userRole !== 'admin') {
-      window.location.href = '../index.html';
+      window.location.href = '../../index.html';
       return;
     }
 
@@ -30,6 +30,6 @@
     window.adminUser   = session.user;
 
   } catch (e) {
-    window.location.href = '../index.html';
+    window.location.href = '../../index.html';
   }
 })();
