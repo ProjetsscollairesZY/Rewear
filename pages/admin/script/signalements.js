@@ -182,7 +182,7 @@
     document.getElementById('btnLogout').addEventListener('click', function () {
       client.auth.signOut().then(function () {
         localStorage.clear();
-        window.location.href = '../index.html';
+        window.location.href = '../../index.html';
       });
     });
   }, 300);
