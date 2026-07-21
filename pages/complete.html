@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complétez votre profil - REWEAR DZ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/signin.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,7 +17,7 @@
     <div class="login-container">
         <div class="login-box">
             <h2>Complétez votre profil</h2>
-            <p style="color: #c89b5f; margin-bottom: 20px; font-size: 14px;">
+            <p style="color: var(--muted); margin-bottom: 20px; font-size: 14px;">
                 Dernière étape ! 🎉
             </p>
 
@@ -24,77 +25,41 @@
                 <input type="text" id="username" placeholder="username" required>
 
                 <select id="sexe" required
-                    style="width: 100%; padding: 14px 16px; margin: 10px 0; border-radius: 10px; border: 1px solid rgba(212, 165, 116, 0.3); background-color: rgba(26, 20, 16, 0.8); color: #f5e6d3; font-size: 14px;">
+                    style="width: 100%; padding: 14px 16px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--beige-dark); background-color: var(--white); color: var(--text); font-size: 14px;">
                     <option value="">Sexe</option>
                     <option value="homme">Homme</option>
                     <option value="femme">Femme</option>
                 </select>
-                <select id="willaya" required
-                    style="width: 100%; padding: 14px 16px; margin: 10px 0; border-radius: 10px; border: 1px solid rgba(212, 165, 116, 0.3); background-color: rgba(26, 20, 16, 0.8); color: #f5e6d3; font-size: 14px;">
+                <select id="wilaya" required
+                    style="width: 100%; padding: 14px 16px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--beige-dark); background-color: var(--white); color: var(--text); font-size: 14px;">
                     <option value="">Wilaya</option>
-                    <option value="01">01 - Adrar</option>
-                    <option value="02">02 - Chlef</option>
-                    <option value="03">03 - Laghouat</option>
-                    <option value="04">04 - Oum El Bouaghi</option>
-                    <option value="05">05 - Batna</option>
-                    <option value="06">06 - Béjaïa</option>
-                    <option value="07">07 - Biskra</option>
-                    <option value="08">08 - Béchar</option>
-                    <option value="09">09 - Blida</option>
-                    <option value="10">10 - Bouira</option>
-                    <option value="11">11 - Tamanrasset</option>
-                    <option value="12">12 - Tébessa</option>
-                    <option value="13">13 - Tlemcen</option>
-                    <option value="14">14 - Tiaret</option>
-                    <option value="15">15 - Tizi Ouzou</option>
-                    <option value="16">16 - Alger</option>
-                    <option value="17">17 - Djelfa</option>
-                    <option value="18">18 - Jijel</option>
-                    <option value="19">19 - Sétif</option>
-                    <option value="20">20 - Saïda</option>
-                    <option value="21">21 - Skikda</option>
-                    <option value="22">22 - Sidi Bel Abbès</option>
-                    <option value="23">23 - Annaba</option>
-                    <option value="24">24 - Guelma</option>
-                    <option value="25">25 - Constantine</option>
-                    <option value="26">26 - Médéa</option>
-                    <option value="27">27 - Mostaganem</option>
-                    <option value="28">28 - M’Sila</option>
-                    <option value="29">29 - Mascara</option>
-                    <option value="30">30 - Ouargla</option>
-                    <option value="31">31 - Oran</option>
-                    <option value="32">32 - El Bayadh</option>
-                    <option value="33">33 - Illizi</option>
-                    <option value="34">34 - Bordj Bou Arreridj</option>
-                    <option value="35">35 - Boumerdès</option>
-                    <option value="36">36 - El Tarf</option>
-                    <option value="37">37 - Tindouf</option>
-                    <option value="38">38 - Tissemsilt</option>
-                    <option value="39">39 - El Oued</option>
-                    <option value="40">40 - Khenchela</option>
-                    <option value="41">41 - Souk Ahras</option>
-                    <option value="42">42 - Tipaza</option>
-                    <option value="43">43 - Mila</option>
-                    <option value="44">44 - Aïn Defla</option>
-                    <option value="45">45 - Naâma</option>
-                    <option value="46">46 - Aïn Témouchent</option>
-                    <option value="47">47 - Ghardaïa</option>
-                    <option value="48">48 - Relizane</option>
-                    <option value="49">49 - El M’Ghair</option>
-                    <option value="50">50 - El Menia</option>
-                    <option value="51">51 - Ouled Djellal</option>
-                    <option value="52">52 - Bordj Badji Mokhtar</option>
-                    <option value="53">53 - Béni Abbès</option>
-                    <option value="54">54 - Timimoun</option>
-                    <option value="55">55 - Touggourt</option>
-                    <option value="56">56 - Djanet</option>
-                    <option value="57">57 - In Salah</option>
-                    <option value="58">58 - In Guezzam</option>
+                    <option>Adrar</option><option>Chlef</option><option>Laghouat</option>
+                    <option>Oum El Bouaghi</option><option>Batna</option><option>Bejaia</option>
+                    <option>Biskra</option><option>Bechar</option><option>Blida</option>
+                    <option>Bouira</option><option>Tamanrasset</option><option>Tebessa</option>
+                    <option>Tlemcen</option><option>Tiaret</option><option>Tizi Ouzou</option>
+                    <option>Alger</option><option>Djelfa</option><option>Jijel</option>
+                    <option>Setif</option><option>Saida</option><option>Skikda</option>
+                    <option>Sidi Bel Abbes</option><option>Annaba</option><option>Guelma</option>
+                    <option>Constantine</option><option>Medea</option><option>Mostaganem</option>
+                    <option>M'Sila</option><option>Mascara</option><option>Ouargla</option>
+                    <option>Oran</option><option>El Bayadh</option><option>Illizi</option>
+                    <option>Bordj Bou Arreridj</option><option>Boumerdes</option><option>El Tarf</option>
+                    <option>Tindouf</option><option>Tissemsilt</option><option>El Oued</option>
+                    <option>Khenchela</option><option>Souk Ahras</option><option>Tipaza</option>
+                    <option>Mila</option><option>Ain Defla</option><option>Naama</option>
+                    <option>Ain Temouchent</option><option>Ghardaia</option><option>Relizane</option>
+                    <option>Timimoun</option><option>Bordj Badji Mokhtar</option>
+                    <option>Ouled Djellal</option><option>Beni Abbes</option><option>In Salah</option>
+                    <option>In Guezzam</option><option>Touggourt</option><option>Djanet</option>
+                    <option>El M'Ghair</option><option>El Meniaa</option>
                 </select>
 
                 <input type="text" id="instagram" placeholder="Instagram">
                 <input type="text" id="facebook" placeholder="Facebook">
-                <input type="text" id="numero" placeholder="Numéro de téléphone">
+                <input type="tel" id="numero" placeholder="Ex: 0555123456 ou +213555123456">
+
+                <p class="form-error" id="formError" style="display:none;"></p>
 
                 <button type="submit" class="login-btn">Continuer</button>
             </form>
@@ -103,15 +68,27 @@
 
 
     <script>
+        function isValidPhone(v) {
+            return /^(0\d{9}|\+213\d{9})$/.test(String(v || '').trim());
+        }
+
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const username = document.getElementById('username').value;
             const sexe = document.getElementById('sexe').value;
-            const willaya = document.getElementById('willaya').value;
+            const wilaya = document.getElementById('wilaya').value;
             const instagram = document.getElementById('instagram').value;
             const facebook = document.getElementById('facebook').value;
-            const numero = document.getElementById('numero').value;
+            const numero = document.getElementById('numero').value.trim();
+            const errEl = document.getElementById('formError');
+            errEl.style.display = 'none';
+
+            if (numero && !isValidPhone(numero)) {
+                errEl.textContent = 'Numéro invalide. Utilisez le format 0XXXXXXXXX ou +213XXXXXXXXX, sans espaces.';
+                errEl.style.display = 'block';
+                return;
+            }
 
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
@@ -120,26 +97,41 @@
                 return;
             }
 
+            // Le nom affiché partout ailleurs (header, annonces...) vient de
+            // user_metadata.username, donc c'est là qu'il doit être écrit.
+            const { error: authError } = await supabaseClient.auth.updateUser({
+                data: { username: username }
+            });
+
+            // Le reste des infos de profil vit dans la table "profiles" (pas "users",
+            // qui n'existe nulle part ailleurs dans le site — c'était le bug qui
+            // empêchait cette étape de fonctionner et bloquait les nouveaux inscrits).
             const { error } = await supabaseClient
-                .from('users')
+                .from('profiles')
                 .update({
                     username: username,
                     sexe: sexe,
-                    willaya: willaya,
+                    wilaya: wilaya,
                     instagram: instagram,
                     facebook: facebook,
-                    numero: numero,
+                    phone: numero,
                     profile_completed: true
                 })
                 .eq('id', user.id);
 
-            if (error) {
-                console.error('Erreur:', error);
-                alert('❌ Erreur');
+            if (error || authError) {
+                console.error('Erreur:', error || authError);
+                if (error && error.code === '23505') {
+                    errEl.textContent = 'Ce numéro de téléphone est déjà utilisé par un autre compte.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                alert('❌ Erreur : ' + ((error || authError).message || 'inconnue') +
+                      '\n\nSi ça mentionne une colonne qui n\'existe pas sur "profiles", dis-le moi pour que j\'ajuste.');
                 return;
             }
 
-            alert('✅ Profil complété !');
+            localStorage.setItem('user', JSON.stringify({ id: user.id, username: username }));
             window.location.href = '../index.html';
         });
     </script>

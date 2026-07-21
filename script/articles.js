@@ -6,6 +6,16 @@
   var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
   var BUCKET = 'article-images';
+  var WILAYA_NAMES = ['Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Bejaia','Biskra','Bechar','Blida','Bouira','Tamanrasset','Tebessa','Tlemcen','Tiaret','Tizi Ouzou','Alger','Djelfa','Jijel','Setif','Saida','Skikda','Sidi Bel Abbes','Annaba','Guelma','Constantine','Medea','Mostaganem',"M'Sila",'Mascara','Ouargla','Oran','El Bayadh','Illizi','Bordj Bou Arreridj','Boumerdes','El Tarf','Tindouf','Tissemsilt','El Oued','Khenchela','Souk Ahras','Tipaza','Mila','Ain Defla','Naama','Ain Temouchent','Ghardaia','Relizane','Timimoun','Bordj Badji Mokhtar','Ouled Djellal','Beni Abbes','In Salah','In Guezzam','Touggourt','Djanet',"El M'Ghair",'El Meniaa'];
+  function wilayaLabel(v) {
+    if (!v) return '';
+    v = String(v).trim();
+    if (/^\d{1,2}$/.test(v)) {
+      var n = parseInt(v, 10);
+      if (n >= 1 && n <= WILAYA_NAMES.length) return WILAYA_NAMES[n - 1];
+    }
+    return v;
+  }
   var MAX_FILE_SIZE = 5 * 1024 * 1024;
   var ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   var MAX_IMAGE_PIXELS = 1920 * 1920;
@@ -118,7 +128,7 @@
         '<img src="' + img + '" alt="' + escHtml(a.title) + '" loading="lazy">' +
         '<div class="card-body">' +
           '<h4>' + escHtml(a.title) + '</h4>' +
-          (a.wilaya ? '<div class="card-desc">📍 ' + escHtml(a.wilaya) + (a.taille ? ' · ' + escHtml(a.taille) : '') + '</div>' : '') +
+          (a.wilaya ? '<div class="card-desc">📍 ' + escHtml(wilayaLabel(a.wilaya)) + (a.taille ? ' · Taille : ' + escHtml(a.taille) : '') + '</div>' : '') +
           '<div class="card-price"><span class="current-bid">' + formatPrice(a.price) + ' DZD</span></div>' +
           '<button class="buy-btn" data-id="' + a.id + '">Voir l\'article</button>' +
         '</div>';
@@ -263,6 +273,39 @@
         wilaya:      data.wilaya || '',
         images:      imageUrls
       }).select('id').single();
+    },
+
+    getArticleById: function(articleId) {
+      var client = getClient();
+      if (!client) return Promise.reject(new Error('Non connecté'));
+      return client.from('articles')
+        .select('id,title,description,price,etat,taille,wilaya,images,category_id,seller_id')
+        .eq('id', articleId).single()
+        .then(function(r) {
+          if (r.error) throw r.error;
+          return r.data;
+        });
+    },
+
+    updateArticle: function(articleId, data, imageUrls) {
+      var client = getClient();
+      if (!client) return Promise.reject(new Error('Non connecté'));
+      var userId = (function() {
+        try { var u = localStorage.getItem('user'); return u ? JSON.parse(u).id : null; } catch(e) { return null; }
+      })();
+      if (!userId) return Promise.reject(new Error('Non connecté'));
+      if (!imageUrls || imageUrls.length === 0) return Promise.reject(new Error('Au moins une photo est obligatoire.'));
+
+      return client.from('articles').update({
+        category_id: data.category_id || null,
+        title:       data.title,
+        description: data.description || '',
+        price:       parseInt(data.price, 10) || 0,
+        etat:        data.etat || 'Bon état',
+        taille:      data.taille || '',
+        wilaya:      data.wilaya || '',
+        images:      imageUrls
+      }).eq('id', articleId).eq('seller_id', userId).select('id').single();
     }
   };
 

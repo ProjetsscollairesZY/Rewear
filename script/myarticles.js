@@ -12,7 +12,7 @@
   if (!user) { window.location.href = '../pages/login.html'; return; }
 
   /* ── Supabase client ── */
-  if (typeof supabase !== 'undefined')
+  if (typeof supabase !== 'undefined' && !window.supabaseClient)
     window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   /* ── DOM refs ── */
@@ -22,6 +22,7 @@
   var statTotal  = document.getElementById('statTotal');
   var statActive = document.getElementById('statActive');
   var statInact  = document.getElementById('statInactive');
+  var statSold   = document.getElementById('statSold');
 
   /* ── State ── */
   var allArticles = [];
@@ -35,18 +36,26 @@
     setTimeout(function () { t.className = 'toast'; }, 3000);
   }
 
+  /* ── Échappement HTML (les intérêts peuvent être soumis par des visiteurs non connectés) ── */
+  function esc(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   /* ── Placeholder image ── */
   function getImg(a) {
     return (a.images && a.images[0])
       ? a.images[0]
-      : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="90" height="90"%3E%3Crect fill="%23513620" width="90" height="90"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23d4a574" font-size="28"%3E📦%3C/text%3E%3C/svg%3E';
+      : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="90" height="90"%3E%3Crect fill="%23F5ECD7" width="90" height="90"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23C5973A" font-size="28"%3E📦%3C/text%3E%3C/svg%3E';
   }
 
   /* ── Render filtered list ── */
 function render() {
   var filtered = allArticles.filter(function (a) {
-    if (currentFilter === 'active')   return a.is_active;
-    if (currentFilter === 'inactive') return !a.is_active;
+    if (currentFilter === 'active')   return a.is_active && !a.is_sold;
+    if (currentFilter === 'inactive') return !a.is_active && !a.is_sold;
+    if (currentFilter === 'sold')     return !!a.is_sold;
     return true;
   });
 
@@ -60,14 +69,23 @@ function render() {
 
   filtered.forEach(function (a) {
     var card = document.createElement('div');
-    card.className = 'my-card' + (a.is_active ? '' : ' inactive');
+    card.className = 'my-card' + (a.is_sold ? ' sold' : (a.is_active ? '' : ' inactive'));
 
-    var statusLabel = a.is_active
-      ? '<span class="card-status active-badge">● Active</span>'
-      : '<span class="card-status inactive-badge">● Inactive</span>';
+    var statusLabel = a.is_sold
+      ? '<span class="card-status sold-badge">✅ Vendue</span>'
+      : (a.is_active
+          ? '<span class="card-status active-badge">● Active</span>'
+          : '<span class="card-status inactive-badge">● Inactive</span>');
 
     var toggleLabel = a.is_active ? 'Désactiver' : 'Activer';
     var toggleClass = a.is_active ? 'btn-toggle deactivate' : 'btn-toggle';
+
+    var actionsHtml = a.is_sold
+      ? '<button class="btn-toggle btn-unsold" data-id="' + a.id + '">↺ Remettre en vente</button>' +
+        '<button class="btn-delete" data-id="' + a.id + '">🗑️ Supprimer</button>'
+      : '<button class="' + toggleClass + '" data-id="' + a.id + '" data-active="' + a.is_active + '">' + toggleLabel + '</button>' +
+        '<button class="btn-sold" data-id="' + a.id + '">✅ Marquer vendue</button>' +
+        '<button class="btn-delete" data-id="' + a.id + '">🗑️ Supprimer</button>';
 
     card.innerHTML =
       '<div class="card-top">' +
@@ -78,10 +96,7 @@ function render() {
           statusLabel +
         '</div>' +
         '<div class="card-price">' + Number(a.price||0).toLocaleString('fr-DZ') + ' DA</div>' +
-        '<div class="card-actions">' +
-          '<button class="' + toggleClass + '" data-id="' + a.id + '" data-active="' + a.is_active + '">' + toggleLabel + '</button>' +
-          '<button class="btn-delete" data-id="' + a.id + '">🗑️ Supprimer</button>' +
-        '</div>' +
+        '<div class="card-actions">' + actionsHtml + '</div>' +
       '</div>' +
       '<div class="interests-bar">' +
         '<span class="interest-badge" data-id="' + a.id + '">🛒 Chargement...</span>' +
@@ -94,19 +109,57 @@ function render() {
     loadInterests(a.id, card);
 
     /* Toggle actif/inactif */
-    card.querySelector('.btn-toggle').addEventListener('click', function () {
-      var btn    = this;
-      var active = btn.getAttribute('data-active') === 'true';
-      btn.disabled = true;
-      window.supabaseClient.from('articles')
-        .update({ is_active: !active })
-        .eq('id', a.id).eq('seller_id', user.id)
-        .then(function (r) {
-          if (r.error) { showToast('Erreur : ' + r.error.message, 'error'); btn.disabled = false; return; }
-          showToast(active ? 'Annonce désactivée.' : 'Annonce activée.', 'success');
-          load();
-        });
-    });
+    var toggleBtn = card.querySelector('.btn-toggle:not(.btn-unsold)');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function () {
+        var btn    = this;
+        var active = btn.getAttribute('data-active') === 'true';
+        btn.disabled = true;
+        window.supabaseClient.from('articles')
+          .update({ is_active: !active })
+          .eq('id', a.id).eq('seller_id', user.id)
+          .then(function (r) {
+            if (r.error) { showToast('Erreur : ' + r.error.message, 'error'); btn.disabled = false; return; }
+            showToast(active ? 'Annonce désactivée.' : 'Annonce activée.', 'success');
+            load();
+          });
+      });
+    }
+
+    /* Marquer comme vendue */
+    var soldBtn = card.querySelector('.btn-sold');
+    if (soldBtn) {
+      soldBtn.addEventListener('click', function () {
+        if (!confirm('Marquer "' + (a.title || 'cette annonce') + '" comme vendue ? Elle sera retirée des annonces publiques.')) return;
+        var btn = this;
+        btn.disabled = true;
+        window.supabaseClient.from('articles')
+          .update({ is_sold: true, is_active: false, sold_at: new Date().toISOString() })
+          .eq('id', a.id).eq('seller_id', user.id)
+          .then(function (r) {
+            if (r.error) { showToast('Erreur : ' + r.error.message, 'error'); btn.disabled = false; return; }
+            showToast('Annonce marquée comme vendue !', 'success');
+            load();
+          });
+      });
+    }
+
+    /* Remettre en vente */
+    var unsoldBtn = card.querySelector('.btn-unsold');
+    if (unsoldBtn) {
+      unsoldBtn.addEventListener('click', function () {
+        var btn = this;
+        btn.disabled = true;
+        window.supabaseClient.from('articles')
+          .update({ is_sold: false, is_active: true, sold_at: null })
+          .eq('id', a.id).eq('seller_id', user.id)
+          .then(function (r) {
+            if (r.error) { showToast('Erreur : ' + r.error.message, 'error'); btn.disabled = false; return; }
+            showToast('Annonce remise en vente.', 'success');
+            load();
+          });
+      });
+    }
 
     /* Supprimer */
     card.querySelector('.btn-delete').addEventListener('click', function () {
@@ -168,16 +221,16 @@ function renderInterests(interests, panel, articleId, badge) {
     div.className = 'interest-item' + (item.is_read ? '' : ' unread');
     div.innerHTML =
       '<div class="interest-item-info">' +
-        '<div class="interest-name">👤 ' + (item.buyer_name || 'Anonyme') + '</div>' +
-        '<div class="interest-contact">📞 ' + (item.buyer_phone || '—') +
-          (item.buyer_email ? ' · ✉️ ' + item.buyer_email : '') + '</div>' +
-        (item.message ? '<div class="interest-msg">"' + item.message + '"</div>' : '') +
+        '<div class="interest-name">👤 ' + esc(item.buyer_name || 'Anonyme') + '</div>' +
+        '<div class="interest-contact">📞 ' + esc(item.buyer_phone || '—') +
+          (item.buyer_email ? ' · ✉️ ' + esc(item.buyer_email) : '') + '</div>' +
+        (item.message ? '<div class="interest-msg">"' + esc(item.message) + '"</div>' : '') +
       '</div>' +
       '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem;">' +
         '<span class="interest-date">' + date + '</span>' +
         (!item.is_read
           ? '<button class="btn-mark-read" data-iid="' + item.id + '">✓ Marquer comme lu</button>'
-          : '<span style="font-size:0.72rem;color:#7dd87d;">✓ Lu</span>') +
+          : '<span style="font-size:0.72rem;color:#3f8f3f;">✓ Lu</span>') +
       '</div>';
 
     /* Bouton marquer comme lu */
@@ -193,7 +246,7 @@ function renderInterests(interests, panel, articleId, badge) {
             if (r.error) { showToast('Erreur.', 'error'); btn.disabled = false; return; }
             item.is_read = true;
             div.classList.remove('unread');
-            btn.outerHTML = '<span style="font-size:0.72rem;color:#7dd87d;">✓ Lu</span>';
+            btn.outerHTML = '<span style="font-size:0.72rem;color:#3f8f3f;">✓ Lu</span>';
             /* Mettre à jour le badge */
             var unread = interests.filter(function (i) { return !i.is_read; }).length;
             badge.className = 'interest-badge' + (unread > 0 ? ' has-new' : '');
@@ -215,7 +268,7 @@ function renderInterests(interests, panel, articleId, badge) {
     errEl.style.display = 'none';
 
     window.supabaseClient.from('articles')
-      .select('id,title,price,etat,images,is_active,created_at')
+      .select('id,title,price,etat,images,is_active,is_sold,created_at')
       .eq('seller_id', user.id)
       .order('created_at', { ascending: false })
       .then(function (r) {
@@ -229,10 +282,12 @@ function renderInterests(interests, panel, articleId, badge) {
         allArticles = r.data || [];
 
         /* Stats */
-        var activeCount = allArticles.filter(function (a) { return a.is_active; }).length;
+        var soldCount   = allArticles.filter(function (a) { return a.is_sold; }).length;
+        var activeCount = allArticles.filter(function (a) { return a.is_active && !a.is_sold; }).length;
         statTotal.textContent  = allArticles.length;
         statActive.textContent = activeCount;
-        statInact.textContent  = allArticles.length - activeCount;
+        statInact.textContent  = allArticles.length - activeCount - soldCount;
+        if (statSold) statSold.textContent = soldCount;
 
         render();
       });
@@ -252,7 +307,3 @@ function renderInterests(interests, panel, articleId, badge) {
   load();
 
 })();
-
-if(user.is_banned){
-   window.location.href = '../error.html';
-}

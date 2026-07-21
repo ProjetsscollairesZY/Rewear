@@ -2,7 +2,7 @@ const SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
 
 const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabaseClient || (window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY));
 
 // Base URL de l'API (serveur Node) — même origine si tu ouvres via http://localhost:3000
 const API_BASE = (typeof window !== 'undefined' && (window.location.protocol === 'file:' || window.location.hostname === ''))
@@ -61,6 +61,15 @@ async function signup(email, password, username) {
 // CONNEXION
 // ==============================
 
+function getSafeRedirect() {
+  try {
+    var r = new URLSearchParams(window.location.search).get('redirect');
+    if (!r) return null;
+    if (r.indexOf('://') !== -1 || r.indexOf('//') === 0) return null; // évite les redirections vers un site externe
+    return r;
+  } catch (e) { return null; }
+}
+
 async function login(email, password) {
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -80,16 +89,14 @@ async function login(email, password) {
       .eq('id', data.user.id)
       .single();
 
-    console.log('USER ID:', data.user.id);
-    console.log('PROFILE:', profile);
-    console.log('PROFILE ERROR:', profileError);
-    console.log('IS BANNED:', profile?.is_banned);
-
     if (profile && profile.is_banned) {
       await supabaseClient.auth.signOut();
       localStorage.clear();
       var reason = encodeURIComponent(profile.ban_reason || '');
-      window.location.href = './banned.html?reason=' + reason;
+      // Adapter le chemin selon l'emplacement de la page (login.html est dans /pages/)
+      var isInSubfolderLogin = window.location.pathname.includes('/pages/') ||
+                               window.location.pathname.includes('/roles/');
+      window.location.href = (isInSubfolderLogin ? '../' : '') + 'banned.html?reason=' + reason;
       return false;
     }
 
@@ -103,7 +110,7 @@ async function login(email, password) {
     if (profile && profile.profile_completed === false) {
       window.location.href = './complete.html';
     } else {
-      window.location.href = '../index.html';
+      window.location.href = getSafeRedirect() || '../index.html';
     }
     return true;
 
@@ -213,7 +220,7 @@ async function initAuth() {
       // Adapter le chemin selon la page actuelle
       var isInSubfolder = window.location.pathname.includes('/pages/') ||
                           window.location.pathname.includes('/roles/');
-      window.location.href = (isInSubfolder ? '' : '') + 'banned.html?reason=' + reason;
+      window.location.href = (isInSubfolder ? '../' : '') + 'banned.html?reason=' + reason;
       return;
     }
   }

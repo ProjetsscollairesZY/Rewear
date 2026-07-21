@@ -16,43 +16,7 @@ var activeCatSlug = '';
 var filtresActifs = {};
 
 // ================================================================
-// HAMBURGER — ouvre/ferme le sidebar drawer
-// ================================================================
-
-var hamburger   = document.getElementById('hamburger');
-var sidebar     = document.getElementById('sidebar');
-var closeSB     = document.getElementById('close-sidebar'); // id corrigé
-
-if (hamburger && sidebar) {
-  hamburger.addEventListener('click', function() {
-    sidebar.classList.add('open');
-    hamburger.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  });
-}
-
-function fermerSidebar() {
-  if (!sidebar) return;
-  sidebar.classList.remove('open');
-  if (hamburger) hamburger.classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-if (closeSB) {
-  closeSB.addEventListener('click', fermerSidebar);
-}
-
-// Fermer en cliquant l'overlay (hors du sidebar)
-document.addEventListener('click', function(e) {
-  if (sidebar && sidebar.classList.contains('open') &&
-      !sidebar.contains(e.target) &&
-      hamburger && !hamburger.contains(e.target)) {
-    fermerSidebar();
-  }
-});
-
-// ================================================================
-// CATÉGORIES — sélection desktop + mobile synchronisée
+// CATÉGORIES — sélection desktop
 // ================================================================
 
 function selectionnerCategorie(slug) {
@@ -60,10 +24,6 @@ function selectionnerCategorie(slug) {
 
   // Desktop category-bar
   document.querySelectorAll('.category-btn').forEach(function(b) {
-    b.classList.toggle('active', (b.dataset.slug || '') === activeCatSlug);
-  });
-  // Mobile mob-cat
-  document.querySelectorAll('.mob-cat').forEach(function(b) {
     b.classList.toggle('active', (b.dataset.slug || '') === activeCatSlug);
   });
 
@@ -75,14 +35,6 @@ function selectionnerCategorie(slug) {
 document.querySelectorAll('.category-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     selectionnerCategorie(btn.dataset.slug || '');
-  });
-});
-
-// Mobile (dans le hamburger)
-document.querySelectorAll('.mob-cat').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    selectionnerCategorie(btn.dataset.slug || '');
-    fermerSidebar();
   });
 });
 
@@ -284,7 +236,7 @@ function majHeaderLocal() {
   try {
     var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
     var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
-    var c = (window.supabaseClient) || supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    var c = window.supabaseClient || (window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
     var s = await c.auth.getSession();
     if (!s.data.session) return;
     var payload = JSON.parse(atob(s.data.session.access_token.split('.')[1]));

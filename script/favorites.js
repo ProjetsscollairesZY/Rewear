@@ -10,7 +10,7 @@
   try { user = JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) {}
   if (!user) { window.location.href = '../pages/login.html'; return; }
 
-  var client  = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var client  = window.supabaseClient || (window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
   var gridEl  = document.getElementById('favGrid');
   var emptyEl = document.getElementById('emptyState');
   var countEl = document.getElementById('favCount');
@@ -80,7 +80,7 @@
       });
     })
     .catch(function () {
-      gridEl.innerHTML = '<div class="loading-state" style="grid-column:1/-1;color:#e07070;">Erreur de chargement.</div>';
+      gridEl.innerHTML = '<div class="loading-state" style="grid-column:1/-1;color:#c0392b;">Erreur de chargement.</div>';
     });
 
 })();

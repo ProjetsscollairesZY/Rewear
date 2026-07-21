@@ -49,10 +49,10 @@
         tr.innerHTML =
           '<td>' + imgHtml + '</td>' +
           '<td style="max-width:180px;"><strong>' + (a.title||'').replace(/</g,'&lt;') + '</strong></td>' +
-          '<td style="color:#d4a574;font-weight:700;">' + Number(a.price||0).toLocaleString('fr-DZ') + ' DA</td>' +
-          '<td style="color:#c89b5f;">' + (a.etat||'—') + '</td>' +
+          '<td style="color:var(--gold);font-weight:700;">' + Number(a.price||0).toLocaleString('fr-DZ') + ' DA</td>' +
+          '<td style="color:var(--muted);">' + (a.etat||'—') + '</td>' +
           '<td><span class="' + (a.is_active ? 'badge-active' : 'badge-inactive') + '">' + (a.is_active ? 'Active' : 'Inactive') + '</span></td>' +
-          '<td style="color:#a07850;">' + formatDate(a.created_at) + '</td>' +
+          '<td style="color:var(--muted);">' + formatDate(a.created_at) + '</td>' +
           '<td><div class="actions-cell">' +
             '<button class="btn-action btn-view" data-id="' + a.id + '">👁️ Voir</button>' +
             '<button class="btn-action btn-toggle" data-id="' + a.id + '" data-active="' + a.is_active + '">' + (a.is_active ? '⏸ Désactiver' : '▶ Activer') + '</button>' +

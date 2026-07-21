@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mes favoris - REWEAR DZ</title>
+  <title>Profil vendeur - REWEAR DZ</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/index.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../script/auth.js"></script>
- <link rel="stylesheet" href="styles/favorites.css">
+  <link rel="stylesheet" href="styles/seller.css">
 </head>
 <body>
 
+  <!-- HEADER -->
   <header>
     <a href="../index.html" class="logo gradient-text">REWEAR DZ</a>
     <div class="nav-right">
@@ -40,31 +40,12 @@
     </div>
   </header>
 
-  <div class="fav-wrap">
-
-    <div>
-      <a href="profile.html" class="back-link">← Retour au profil</a>
-    </div>
-
-    <div class="page-header">
-      <h1>❤️ Mes favoris</h1>
-      <div class="fav-count">Total : <span id="favCount">—</span></div>
-    </div>
-
-    <div id="favGrid" class="favorites-grid">
-      <div class="loading-state" style="grid-column:1/-1">Chargement de vos favoris...</div>
-    </div>
-
-    <div id="emptyState" class="empty-state">
-      <div class="empty-icon">❤️</div>
-      <p>Vous n'avez pas encore de favoris.<br>Explorez les annonces et ajoutez-en !</p>
-      <a href="../index.html" class="btn-browse">Parcourir les annonces</a>
-    </div>
-
+  <div class="page-wrap" id="pageWrap">
+    <a href="../index.html" class="back-link">← Retour aux annonces</a>
+    <div class="page-loading" id="pageLoading">Chargement du profil...</div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
-  <script src="../script/favorites.js"></script>
+  <script src="../script/auth.js"></script>
+  <script src="../script/seller.js"></script>
 </body>
 </html>

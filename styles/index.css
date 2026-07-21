@@ -1,4 +1,20 @@
 /* =========================
+   THEME
+========================= */
+:root {
+  --brown: #6B3A2A;
+  --brown-light: #8B5240;
+  --beige: #F5ECD7;
+  --beige-dark: #EAD9BC;
+  --gold: #C5973A;
+  --gold-light: #D4AF5A;
+  --dark: #1A1009;
+  --text: #3D2010;
+  --muted: #8A7060;
+  --white: #FEFAF4;
+}
+
+/* =========================
    RESET
 ========================= */
 *, *::before, *::after {
@@ -14,14 +30,14 @@
    BODY
 ========================= */
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
 
   display: flex;
   flex-direction: column;
 
-  background: radial-gradient(ellipse at top right, #EADBC8, #3E2A1F);
-  color: #f5e6d3;
+  background: var(--white);
+  color: var(--text);
 }
 
 /* =========================
@@ -34,18 +50,20 @@ header {
 
   padding: 0.75rem 1rem;
 
-  background: #3E2A1F;
+  background: var(--brown);
 
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2px 20px rgba(107,58,42,0.3);
 }
 
 .logo.gradient-text {
+  font-family: 'Playfair Display', serif;
   font-size: 1.25rem;
   font-weight: 800;
 
-  background: linear-gradient(135deg, #d4a574, #f4e5c2);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -65,24 +83,24 @@ header {
 
   border-radius: 8px;
 
-  color: #f5e6d3;
+  color: var(--beige);
   text-decoration: none;
   font-weight: 600;
 
-  border: 1px solid rgba(212, 165, 116, 0.4);
-  background: rgba(212, 165, 116, 0.1);
+  border: 1px solid rgba(197, 151, 58, 0.4);
+  background: rgba(197, 151, 58, 0.12);
 
   transition: 0.2s;
 }
 
 .nav-right a.nav-btn:hover {
-  background: rgba(212, 165, 116, 0.25);
+  background: rgba(197, 151, 58, 0.25);
 }
 
 .nav-right a.btn-primary {
-  background: linear-gradient(135deg, #d4a574, #f4e5c2);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
   border: none;
-  color: #3d2817;
+  color: var(--white);
 }
 
 /* =========================
@@ -114,20 +132,22 @@ header {
   width: 220px;
   flex-shrink: 0;
 
-  background: rgba(81, 54, 32, 0.85);
+  background: var(--beige);
+  border: 1px solid var(--beige-dark);
 
   padding: 1.25rem;
 
-  border-radius: 12px;
+  border-radius: 16px;
 
   position: sticky;
   top: 4rem;
 }
 
 .sidebar h3 {
+  font-family: 'Playfair Display', serif;
   font-size: 0.95rem;
   margin-bottom: 0.75rem;
-  color: #f4e5c2;
+  color: var(--brown);
 }
 
 .sidebar ul {
@@ -137,7 +157,7 @@ header {
 .sidebar > ul > li {
   padding: 0.5rem 0.75rem;
 
-  color: #d4a574;
+  color: var(--muted);
   font-size: 0.9rem;
 
   cursor: pointer;
@@ -148,8 +168,8 @@ header {
 }
 
 .sidebar > ul > li:hover {
-  background: rgba(212, 165, 116, 0.2);
-  color: #f4e5c2;
+  background: rgba(197, 151, 58, 0.15);
+  color: var(--brown);
 }
 
 .sub-list {
@@ -167,11 +187,11 @@ header {
 .sub-list li {
   padding: 0.35rem 0;
   font-size: 0.85rem;
-  color: #c89b5f;
+  color: var(--muted);
 }
 
 .sub-list li:hover {
-  color: #f4e5c2;
+  color: var(--brown);
 }
 
 /* =========================
@@ -185,9 +205,10 @@ header {
   padding: 0.75rem;
   margin-bottom: 1rem;
 
-  background: rgba(61, 40, 23, 0.5);
+  background: var(--beige);
+  border: 1px solid var(--beige-dark);
 
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .category-btn {
@@ -195,11 +216,11 @@ header {
 
   border-radius: 999px;
 
-  border: 1px solid rgba(212, 165, 116, 0.4);
+  border: 1px solid rgba(107, 58, 42, 0.25);
 
   background: transparent;
 
-  color: #ddcdc3;
+  color: var(--muted);
 
   font-size: 0.875rem;
   font-weight: 600;
@@ -210,14 +231,14 @@ header {
 }
 
 .category-btn:hover {
-  background: rgba(212, 165, 116, 0.2);
-  color: #f4e5c2;
+  background: rgba(197, 151, 58, 0.15);
+  color: var(--brown);
 }
 
 .category-btn.active {
-  background: linear-gradient(135deg, #d4a574, #f4e5c2);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
   border: none;
-  color: #3d2817;
+  color: var(--white);
 }
 
 /* =========================
@@ -236,11 +257,11 @@ header {
   align-items: center;
   gap: 0.5rem;
 
-  background: rgba(61,40,23,0.85);
+  background: var(--white);
 
-  border: 1px solid rgba(212,165,116,0.3);
+  border: 1px solid var(--beige-dark);
 
-  border-radius: 10px;
+  border-radius: 12px;
 
   padding: 0 0.85rem;
 }
@@ -252,7 +273,7 @@ header {
   border: none;
   outline: none;
 
-  color: #f4e5c2;
+  color: var(--text);
 
   font-size: 0.88rem;
 
@@ -260,11 +281,11 @@ header {
 }
 
 .search-wrap input::placeholder {
-  color: #a07850;
+  color: var(--muted);
 }
 
 .search-ico {
-  color: #c89b5f;
+  color: var(--gold);
   font-size: 0.9rem;
 }
 
@@ -275,13 +296,13 @@ header {
 
   padding: 0 1rem;
 
-  background: rgba(212,165,116,0.1);
+  background: var(--beige);
 
-  border: 1px solid rgba(212,165,116,0.35);
+  border: 1px solid var(--beige-dark);
 
-  border-radius: 10px;
+  border-radius: 12px;
 
-  color: #3d2817;
+  color: var(--brown);
 
   font-size: 0.85rem;
   font-weight: 600;
@@ -294,7 +315,7 @@ header {
 }
 
 .btn-filtres:hover {
-  background: rgba(212,165,116,0.2);
+  background: var(--beige-dark);
 }
 
 .btn-filtres .arr {
@@ -317,9 +338,9 @@ header {
 
   gap: 0.7rem;
 
-  background: rgba(61,40,23,0.9);
+  background: var(--beige);
 
-  border: 1px solid rgba(212,165,116,0.2);
+  border: 1px solid var(--beige-dark);
 
   border-radius: 12px;
 
@@ -338,7 +359,7 @@ header {
   font-size: 0.68rem;
   font-weight: 700;
 
-  color: #a07850;
+  color: var(--muted);
 
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -352,13 +373,13 @@ header {
 
   padding: 0.48rem 0.65rem;
 
-  background: rgba(81,54,32,0.95);
+  background: var(--white);
 
-  border: 1px solid rgba(212,165,116,0.28);
+  border: 1px solid var(--beige-dark);
 
   border-radius: 8px;
 
-  color: #f4e5c2;
+  color: var(--text);
 
   font-size: 0.82rem;
 
@@ -369,7 +390,8 @@ header {
 }
 
 .fg select option {
-  background: #3d2817;
+  background: var(--white);
+  color: var(--text);
 }
 
 .prix-row {
@@ -383,7 +405,7 @@ header {
 }
 
 .prix-sep {
-  color: #a07850;
+  color: var(--muted);
   font-size: 0.78rem;
   flex-shrink: 0;
 }
@@ -399,12 +421,12 @@ header {
 
   padding: 0.5rem;
 
-  background: linear-gradient(135deg, #d4a574, #f4e5c2);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
 
   border: none;
   border-radius: 8px;
 
-  color: #3d2817;
+  color: var(--white);
 
   font-weight: 700;
   font-size: 0.82rem;
@@ -427,7 +449,7 @@ header {
 
   border-radius: 8px;
 
-  color: #e07070;
+  color: #c0392b;
 
   font-size: 0.82rem;
   font-weight: 600;
@@ -459,14 +481,14 @@ header {
 
   padding: 0.18rem 0.6rem;
 
-  background: rgba(212,165,116,0.12);
+  background: rgba(197,151,58,0.12);
 
-  border: 1px solid rgba(212,165,116,0.35);
+  border: 1px solid rgba(197,151,58,0.4);
 
   border-radius: 999px;
 
   font-size: 0.74rem;
-  color: #d4a574;
+  color: var(--brown);
   font-weight: 600;
 }
 
@@ -474,7 +496,7 @@ header {
   background: none;
   border: none;
 
-  color: #a07850;
+  color: var(--muted);
 
   cursor: pointer;
 
@@ -486,7 +508,7 @@ header {
 }
 
 .ftag button:hover {
-  color: #e07070;
+  color: #c0392b;
 }
 
 /* =========================
@@ -506,13 +528,13 @@ header {
 .card {
   position: relative;
 
-  background: rgba(81, 54, 32, 0.8);
+  background: white;
 
-  border-radius: 12px;
+  border-radius: 16px;
 
   overflow: hidden;
 
-  border: 1px solid rgba(212, 165, 116, 0.2);
+  border: 1px solid var(--beige-dark);
 
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -520,7 +542,7 @@ header {
 .card:hover {
   transform: translateY(-4px);
 
-  box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 32px rgba(107,58,42,0.12);
 }
 
 .card img {
@@ -534,14 +556,15 @@ header {
 }
 
 .card h4 {
+  font-family: 'Playfair Display', serif;
   font-size: 0.95rem;
-  color: #f4e5c2;
+  color: var(--brown);
   margin-bottom: 0.35rem;
 }
 
 .card-desc {
   font-size: 0.8rem;
-  color: #c89b5f;
+  color: var(--muted);
   margin-bottom: 0.5rem;
 }
 
@@ -552,7 +575,7 @@ header {
 .current-bid {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #f4e5c2;
+  color: var(--gold);
 }
 
 button.buy-btn {
@@ -563,9 +586,9 @@ button.buy-btn {
   border: none;
   border-radius: 8px;
 
-  background: linear-gradient(135deg, #d4a574, #f4e5c2);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
 
-  color: #3d2817;
+  color: var(--white);
 
   font-weight: 700;
   font-size: 0.875rem;
@@ -590,9 +613,9 @@ button.buy-btn:hover {
   font-size: 0.7rem;
   font-weight: 700;
 
-  background: rgba(212, 165, 116, 0.9);
+  background: rgba(197, 151, 58, 0.95);
 
-  color: #3d2817;
+  color: var(--white);
 
   z-index: 1;
 }
@@ -616,9 +639,9 @@ button.buy-btn:hover {
 
   border-radius: 999px;
 
-  background: linear-gradient(135deg, #d4a574, #f4e5c2);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
 
-  color: #3d2817;
+  color: var(--white);
 
   font-weight: 700;
   font-size: 0.85rem;
@@ -641,9 +664,9 @@ button.buy-btn:hover {
 
   border-radius: 50%;
 
-  background: linear-gradient(135deg, #d4a574, #f4e5c2);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
 
-  color: #3d2817;
+  color: var(--white);
 
   font-weight: 800;
   font-size: 0.9rem;
@@ -654,7 +677,7 @@ button.buy-btn:hover {
 
   cursor: pointer;
 
-  border: 2px solid rgba(212, 165, 116, 0.5);
+  border: 2px solid rgba(197, 151, 58, 0.5);
 }
 
 .dropdown {
@@ -665,13 +688,13 @@ button.buy-btn:hover {
 
   min-width: 200px;
 
-  background: rgba(61, 40, 23, 0.98);
+  background: var(--white);
 
-  border: 1px solid rgba(212, 165, 116, 0.3);
+  border: 1px solid var(--beige-dark);
 
-  border-radius: 10px;
+  border-radius: 12px;
 
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 32px rgba(107,58,42,0.18);
 
   opacity: 0;
   visibility: hidden;
@@ -694,18 +717,18 @@ button.buy-btn:hover {
 .dropdown-header {
   padding: 0.75rem 1rem;
 
-  border-bottom: 1px solid rgba(212,165,116,0.2);
+  border-bottom: 1px solid var(--beige-dark);
 }
 
 .dropdown-header .username {
   font-weight: 700;
-  color: #f4e5c2;
+  color: var(--brown);
   font-size: 0.9rem;
 }
 
 .dropdown-header .user-rating {
   font-size: 0.8rem;
-  color: #d4a574;
+  color: var(--gold);
 }
 
 .dropdown a,
@@ -718,7 +741,7 @@ button.buy-btn:hover {
 
   padding: 0.6rem 1rem;
 
-  color: #c89b5f;
+  color: var(--muted);
 
   text-decoration: none;
 
@@ -734,13 +757,13 @@ button.buy-btn:hover {
 
 .dropdown a:hover,
 .dropdown button.dd-item:hover {
-  background: rgba(212,165,116,0.15);
-  color: #f4e5c2;
+  background: rgba(197,151,58,0.12);
+  color: var(--brown);
 }
 
 .dropdown .logout-btn {
-  border-top: 1px solid rgba(212,165,116,0.2);
-  color: #e07070;
+  border-top: 1px solid var(--beige-dark);
+  color: #c0392b;
 }
 
 /* =========================
@@ -763,7 +786,7 @@ button.buy-btn:hover {
   width: 22px;
   height: 2px;
 
-  background: #d4a574;
+  background: var(--gold);
 
   border-radius: 1px;
 }
@@ -791,7 +814,7 @@ button.buy-btn:hover {
   background: none;
   border: none;
 
-  color: #f4e5c2;
+  color: var(--brown);
 
   font-size: 1.5rem;
 
@@ -806,9 +829,9 @@ button.buy-btn:hover {
 footer {
   margin-top: auto;
 
-  background: rgba(40, 25, 12, 0.97);
+  background: var(--brown);
 
-  border-top: 1px solid rgba(212, 165, 116, 0.18);
+  border-top: none;
 
   padding: 2rem 1.5rem 1.25rem;
 
@@ -828,7 +851,7 @@ footer {
 }
 
 .footer-links a {
-  color: #c89b5f;
+  color: rgba(245,236,215,0.75);
 
   font-size: 0.85rem;
   font-weight: 600;
@@ -839,14 +862,14 @@ footer {
 }
 
 .footer-links a:hover {
-  color: #f4e5c2;
+  color: var(--gold-light);
 }
 
 .footer-sep {
   width: 48px;
   height: 1px;
 
-  background: rgba(212, 165, 116, 0.25);
+  background: rgba(197, 151, 58, 0.4);
 
   margin: 0 auto 1.25rem;
 }
@@ -856,13 +879,13 @@ footer {
 
   font-size: 0.82rem;
 
-  color: #a07850;
+  color: rgba(245,236,215,0.7);
 
   line-height: 1.7;
 }
 
 .footer-credit strong {
-  color: #d4a574;
+  color: var(--gold);
 }
 
 .footer-domain {
@@ -870,7 +893,7 @@ footer {
 
   font-size: 0.75rem;
 
-  color: #6b4d2e;
+  color: rgba(245,236,215,0.45);
 
   letter-spacing: 0.04em;
 }
@@ -884,13 +907,9 @@ footer {
 
   text-align: center;
 
-  color: #c89b5f;
+  color: var(--muted);
 
   padding: 2rem;
-}
-
-.empty-msg {
-  color: #3d2817;
 }
 
 /* =========================

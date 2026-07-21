@@ -15,19 +15,17 @@
       gap: 0.75rem;
     }
     .page-header h1 {
+      font-family: 'Playfair Display', serif;
       font-size: 1.4rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #d4a574, #f4e5c2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--brown);
     }
     .back-link {
       font-size: 0.85rem;
-      color: #c89b5f;
+      color: var(--muted);
       text-decoration: none;
     }
-    .back-link:hover { color: #f4e5c2; }
+    .back-link:hover { color: var(--brown); }
 
     /* ── GRID ── */
     .favorites-grid {
@@ -36,16 +34,15 @@
       gap: 1rem;
     }
     .fav-card {
-      background: rgba(61, 40, 23, 0.75);
-      border: 1px solid rgba(212, 165, 116, 0.18);
+      background: white;
+      border: 1px solid var(--beige-dark);
       border-radius: 14px;
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
       position: relative;
-      backdrop-filter: blur(6px);
     }
-    .fav-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .fav-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(107,58,42,0.12); }
     .fav-card img {
       width: 100%;
       aspect-ratio: 1;
@@ -55,7 +52,7 @@
     .fav-card-placeholder {
       width: 100%;
       aspect-ratio: 1;
-      background: rgba(81,54,32,0.5);
+      background: var(--beige);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -67,7 +64,7 @@
     .fav-card-body h4 {
       font-size: 0.88rem;
       font-weight: 700;
-      color: #f4e5c2;
+      color: var(--brown);
       margin-bottom: 0.25rem;
       white-space: nowrap;
       overflow: hidden;
@@ -75,13 +72,13 @@
     }
     .fav-card-body .fav-etat {
       font-size: 0.75rem;
-      color: #c89b5f;
+      color: var(--muted);
       margin-bottom: 0.3rem;
     }
     .fav-card-body .fav-price {
       font-size: 0.95rem;
       font-weight: 800;
-      color: #d4a574;
+      color: var(--gold);
     }
     .btn-unfav {
       position: absolute;
@@ -90,24 +87,23 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: rgba(61,40,23,0.88);
-      border: 1px solid rgba(220,80,80,0.4);
-      color: #e07070;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(192,57,43,0.35);
+      color: #c0392b;
       font-size: 0.9rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: 0.2s;
-      backdrop-filter: blur(4px);
     }
-    .btn-unfav:hover { background: rgba(220,80,80,0.25); transform: scale(1.1); }
+    .btn-unfav:hover { background: rgba(192,57,43,0.12); transform: scale(1.1); }
 
     /* ── EMPTY ── */
     .empty-state {
       text-align: center;
       padding: 4rem 1rem;
-      color: #a07850;
+      color: var(--muted);
       display: none;
     }
     .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
@@ -115,8 +111,8 @@
     .btn-browse {
       padding: 0.6rem 1.5rem;
       border-radius: 999px;
-      background: linear-gradient(135deg, #d4a574, #f4e5c2);
-      color: #3d2817;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--white);
       font-weight: 700;
       font-size: 0.85rem;
       text-decoration: none;
@@ -127,7 +123,7 @@
     /* ── LOADING ── */
     .loading-state {
       text-align: center;
-      color: #c89b5f;
+      color: var(--muted);
       padding: 3rem;
       font-size: 0.9rem;
     }
@@ -135,10 +131,10 @@
     /* ── COUNTER ── */
     .fav-count {
       font-size: 0.85rem;
-      color: #c89b5f;
+      color: var(--muted);
     }
     .fav-count span {
-      color: #d4a574;
+      color: var(--gold);
       font-weight: 700;
     }
 
@@ -147,11 +143,11 @@
       position: fixed;
       bottom: 1.5rem;
       right: 1.5rem;
-      background: rgba(61, 40, 23, 0.97);
-      border: 1px solid rgba(212, 165, 116, 0.4);
+      background: var(--brown);
+      border: 1px solid rgba(197, 151, 58, 0.4);
       border-radius: 10px;
       padding: 0.75rem 1.25rem;
-      color: #f4e5c2;
+      color: var(--beige);
       font-size: 0.875rem;
       font-weight: 600;
       z-index: 9999;
@@ -159,12 +155,12 @@
       opacity: 0;
       transition: 0.3s;
       pointer-events: none;
+      box-shadow: 0 8px 24px rgba(26,16,9,0.25);
     }
     .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { border-color: rgba(92,184,92,0.5); }
-    .toast.error   { border-color: rgba(220,80,80,0.5); color: #e07070; }
+    .toast.success { border-color: rgba(92,184,92,0.6); }
+    .toast.error   { border-color: rgba(220,80,80,0.6); color: #f0b3ab; }
 
     @media (max-width: 480px) {
       .favorites-grid { grid-template-columns: repeat(2, 1fr); }
     }
-  

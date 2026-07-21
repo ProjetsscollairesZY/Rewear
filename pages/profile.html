@@ -4,15 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mon Profil - REWEAR DZ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/profile.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../script/auth.js"></script>
 </head>
 <body>
 
   <header>
     <a href="../index.html" class="logo gradient-text">REWEAR DZ</a>
     <div class="nav-right">
-      <a href="../index.html" class="nav-btn">← Accueil</a>
+      <div class="only-guest" id="guest-nav">
+        <a href="login.html" class="nav-btn">Se connecter</a>
+        <a href="signin.html" class="nav-btn btn-primary">S'inscrire</a>
+      </div>
+      <div class="only-auth" id="auth-nav">
+        <a href="admin/index.html" id="admin-link" style="display:none;" class="nav-btn">Administration</a>
+        <a href="../roles/vendeur/publier.html" class="btn-publish">+ Publier</a>
+        <div class="user-menu">
+          <div class="user-avatar" id="avatar-btn">?</div>
+          <div class="dropdown" id="dropdown">
+            <div class="dropdown-header">
+              <div class="username" id="dd-username">Chargement...</div>
+              <div class="user-rating" id="dd-rating"></div>
+            </div>
+            <a href="profile.html"><span class="icon">👤</span> Mon profil</a>
+            <a href="myarticles.html"><span class="icon">📦</span> Mes annonces</a>
+            <button class="dd-item logout-btn" id="logout-btn">
+              <span class="icon">🚪</span> Se déconnecter
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -34,8 +57,9 @@
       </div>
       <div class="profile-actions">
         <button class="btn-edit" id="btnEditProfile">✏️ Modifier</button>
+        <button class="btn-edit" id="btnViewPublic">👁️ Mon profil public</button>
   <button class="btn-logout" id="btnLogout">Déconnexion</button>
-       
+
       </div>
     </div>
 
@@ -75,14 +99,14 @@
       </div>
       <div class="modal-field">
   <label>📞 Téléphone</label>
-  <input type="tel" id="editPhone" placeholder="Ex: 0555 12 34 56" maxlength="20">
+  <input type="tel" id="editPhone" placeholder="Ex: 0555123456 ou +213555123456" maxlength="20">
 </div>
 <div class="modal-field">
-  <label>📸 Instagram</label>
+  <label><svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-3px"><rect width="24" height="24" rx="6" fill="#E4405F"/><rect x="6" y="6" width="12" height="12" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="16.1" cy="7.9" r="0.9" fill="#fff"/></svg> Instagram</label>
   <input type="text" id="editInstagram" placeholder="@votre_compte" maxlength="60">
 </div>
 <div class="modal-field">
-  <label>🔵 Facebook</label>
+  <label><svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-3px"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M15.5 8.5h-1.6c-.5 0-1 .3-1 1v1.6h2.5l-.3 2.4h-2.2V21h-2.7v-7.5H8.3v-2.4h2v-1.9c0-2 1.2-3.2 3.2-3.2h2v2.5z" fill="#fff"/></svg> Facebook</label>
   <input type="text" id="editFacebook" placeholder="votre.nom ou lien complet" maxlength="120">
 </div>
       <p class="modal-error" id="editError"></p>

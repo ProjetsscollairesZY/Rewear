@@ -16,7 +16,10 @@
     return;
   }
 
-  var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var client = window.supabaseClient || (window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
+
+  var ICON_INSTA = '<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-3px"><rect width="24" height="24" rx="6" fill="#E4405F"/><rect x="6" y="6" width="12" height="12" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="16.1" cy="7.9" r="0.9" fill="#fff"/></svg>';
+  var ICON_FB    = '<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-3px"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M15.5 8.5h-1.6c-.5 0-1 .3-1 1v1.6h2.5l-.3 2.4h-2.2V21h-2.7v-7.5H8.3v-2.4h2v-1.9c0-2 1.2-3.2 3.2-3.2h2v2.5z" fill="#fff"/></svg>';
 
   /* ── Toast ── */
   function showToast(msg, type) {
@@ -39,6 +42,11 @@
     val = val.trim();
     if (val.startsWith('http')) return val;
     return prefix + val;
+  }
+  function esc(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
   /* ── Fill profile (base) ── */
@@ -68,20 +76,20 @@
 
     if (phone) {
       chipsEl.innerHTML +=
-        '<a class="meta-chip" href="tel:' + phone + '">' +
-          '<span class="icon">📞</span>' + phone +
+        '<a class="meta-chip" href="tel:' + esc(phone) + '">' +
+          '<span class="icon">📞</span>' + esc(phone) +
         '</a>';
     }
     if (instagram) {
       chipsEl.innerHTML +=
-        '<a class="meta-chip meta-chip--insta" href="' + safeUrl(instagram, 'https://instagram.com/') + '" target="_blank" rel="noopener">' +
-          '<span class="icon">📸</span>@' + instagram.replace(/^@/, '') +
+        '<a class="meta-chip meta-chip--insta" href="' + esc(safeUrl(instagram, 'https://instagram.com/')) + '" target="_blank" rel="noopener">' +
+          '<span class="icon">' + ICON_INSTA + '</span>@' + esc(instagram.replace(/^@/, '')) +
         '</a>';
     }
     if (facebook) {
       chipsEl.innerHTML +=
-        '<a class="meta-chip meta-chip--fb" href="' + safeUrl(facebook, 'https://facebook.com/') + '" target="_blank" rel="noopener">' +
-          '<span class="icon">🔵</span>' + facebook.replace(/^@/, '') +
+        '<a class="meta-chip meta-chip--fb" href="' + esc(safeUrl(facebook, 'https://facebook.com/')) + '" target="_blank" rel="noopener">' +
+          '<span class="icon">' + ICON_FB + '</span>' + esc(facebook.replace(/^@/, '')) +
         '</a>';
     }
 
@@ -170,12 +178,13 @@
   document.getElementById('btnEditProfile').addEventListener('click', function () {
     document.getElementById('editUsername').value = username;
     /* Pre-fill social fields from Supabase */
-    client.from('profiles').select('phone,instagram,facebook').eq('id', user.id).maybeSingle()
+    client.from('profiles').select('phone,instagram,facebook,wilaya').eq('id', user.id).maybeSingle()
       .then(function (r) {
         var p = (r && r.data) ? r.data : {};
         document.getElementById('editPhone').value     = p.phone     || '';
         document.getElementById('editInstagram').value = p.instagram || '';
         document.getElementById('editFacebook').value  = p.facebook  || '';
+        document.getElementById('editWilaya').value    = p.wilaya    || '';
       });
     modal.classList.add('open');
   });
@@ -189,6 +198,7 @@
 
   document.getElementById('btnSaveEdit').addEventListener('click', function () {
     var newName   = document.getElementById('editUsername').value.trim();
+    var newWilaya = document.getElementById('editWilaya').value.trim();
     var newPhone  = document.getElementById('editPhone').value.trim();
     var newInsta  = document.getElementById('editInstagram').value.trim().replace(/^@/, '');
     var newFb     = document.getElementById('editFacebook').value.trim().replace(/^@/, '');
@@ -199,23 +209,44 @@
       errEl.style.display = 'block';
       return;
     }
+    if (newPhone && !/^(0\d{9}|\+213\d{9})$/.test(newPhone)) {
+      errEl.textContent   = 'Numéro invalide. Utilisez le format 0XXXXXXXXX ou +213XXXXXXXXX, sans espaces.';
+      errEl.style.display = 'block';
+      return;
+    }
     errEl.style.display = 'none';
 
     var btn = document.getElementById('btnSaveEdit');
     btn.disabled = true;
     btn.textContent = 'Enregistrement...';
 
-    /* Upsert profile in Supabase */
-    client.from('profiles').upsert({
-      id:        user.id,
-      phone:     newPhone  || null,
-      instagram: newInsta  || null,
-      facebook:  newFb     || null
-    }).then(function (res) {
+    /* Le nom affiché partout ailleurs (header, cartes...) vient de user_metadata.username,
+       donc on le met à jour là — en plus de la table profiles — sinon le changement ne
+       survit pas à la prochaine connexion. */
+    Promise.all([
+      client.auth.updateUser({ data: { username: newName } }),
+      client.from('profiles').upsert({
+        id:        user.id,
+        username:  newName,
+        wilaya:    newWilaya || null,
+        phone:     newPhone  || null,
+        instagram: newInsta  || null,
+        facebook:  newFb     || null
+      })
+    ]).then(function (results) {
       btn.disabled = false;
       btn.textContent = 'Enregistrer';
 
-      if (res.error) { showToast('Erreur : ' + res.error.message, 'error'); return; }
+      var authRes = results[0], profileRes = results[1];
+      if (authRes.error || profileRes.error) {
+        if (profileRes.error && profileRes.error.code === '23505') {
+          errEl.textContent   = 'Ce numéro de téléphone est déjà utilisé par un autre compte.';
+          errEl.style.display = 'block';
+          return;
+        }
+        showToast('Erreur : ' + ((authRes.error || profileRes.error).message), 'error');
+        return;
+      }
 
       /* Update localStorage */
       user.username = newName;
@@ -232,6 +263,11 @@
     });
   });
 
+  /* ── Voir mon profil public ── */
+  document.getElementById('btnViewPublic').addEventListener('click', function () {
+    window.location.href = 'seller.html?id=' + user.id;
+  });
+
   /* ── Logout ── */
   document.getElementById('btnLogout').addEventListener('click', function () {
     if (!confirm('Se déconnecter ?')) return;
@@ -242,6 +278,3 @@
   });
 
 })();
-if(user.is_banned){
-   window.location.href = '../error.html';
-}

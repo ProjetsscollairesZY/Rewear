@@ -22,17 +22,23 @@
       return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
+    function esc(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
     function userCell(profile, isSeller) {
-      if (!profile) return '<div class="user-cell"><div class="user-name" style="color:#a07850;">Inconnu</div></div>';
+      if (!profile) return '<div class="user-cell"><div class="user-name" style="color:var(--muted);">Inconnu</div></div>';
       var banniBadge = profile.is_banned
         ? '<span class="badge-banni">Banni</span>'
         : '<span class="badge-ok">Actif</span>';
       var meta = '';
-      if (profile.phone)     meta += '<span>📞 ' + profile.phone + '</span>';
-      if (profile.instagram) meta += '<span>📷 @' + profile.instagram + '</span>';
-      if (profile.email)     meta += '<span>✉️ ' + profile.email + '</span>';
+      if (profile.phone)     meta += '<span>📞 ' + esc(profile.phone) + '</span>';
+      if (profile.instagram) meta += '<span><svg width="12" height="12" viewBox="0 0 24 24" style="vertical-align:-2px"><rect width="24" height="24" rx="6" fill="#E4405F"/><rect x="6" y="6" width="12" height="12" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="16.1" cy="7.9" r="0.9" fill="#fff"/></svg> @' + esc(profile.instagram) + '</span>';
+      if (profile.email)     meta += '<span>✉️ ' + esc(profile.email) + '</span>';
       return '<div class="user-cell">' +
-        '<div class="user-name">' + (profile.username || 'Sans nom') + (isSeller ? banniBadge : '') + '</div>' +
+        '<div class="user-name">' + esc(profile.username || 'Sans nom') + (isSeller ? banniBadge : '') + '</div>' +
         (meta ? '<div class="user-meta">' + meta + '</div>' : '') +
         '</div>';
     }
@@ -53,9 +59,9 @@
         tr.innerHTML =
           '<td>' + userCell(seller, true) + '</td>' +
           '<td>' + userCell(author, false) + '</td>' +
-          '<td><span class="badge-motif">' + (s.excuse || '—') + '</span></td>' +
-          '<td><div class="comment-cell">' + (s.comment || '—') + '</div></td>' +
-          '<td style="color:#a07850;white-space:nowrap;">' + formatDate(s.created_at) + '</td>' +
+          '<td><span class="badge-motif">' + esc(s.excuse || '—') + '</span></td>' +
+          '<td><div class="comment-cell">' + esc(s.comment || '—') + '</div></td>' +
+          '<td style="color:var(--muted);white-space:nowrap;">' + formatDate(s.created_at) + '</td>' +
           '<td><div class="actions-cell">' +
             (!isBanned && seller ? '<button class="btn-action btn-ban">🚫 Bannir vendeur</button>' : '') +
             '<button class="btn-action btn-delete">🗑️ Supprimer</button>' +

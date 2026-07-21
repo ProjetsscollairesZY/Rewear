@@ -1,11 +1,23 @@
 /* Publier — formulaire annonce */
+:root {
+  --brown: #6B3A2A;
+  --brown-light: #8B5240;
+  --beige: #F5ECD7;
+  --beige-dark: #EAD9BC;
+  --gold: #C5973A;
+  --gold-light: #D4AF5A;
+  --dark: #1A1009;
+  --text: #3D2010;
+  --muted: #8A7060;
+  --white: #FEFAF4;
+}
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
-  background: radial-gradient(ellipse at top right, #EADBC8, #3E2A1F);
-    color: #f5e6d3;
+  background: var(--white);
+  color: var(--text);
   padding: 1rem;
 }
 
@@ -15,35 +27,33 @@ body {
   margin-bottom: 1rem;
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  background: rgba(212, 165, 116, 0.2);
-  border: 1px solid rgba(212, 165, 116, 0.4);
-  color: #3E2A1F;
+  background: var(--beige);
+  border: 1px solid var(--beige-dark);
+  color: var(--brown);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
 }
-.back-link:hover { background: rgba(212, 165, 116, 0.3); color: #f4e5c2; }
+.back-link:hover { background: var(--beige-dark); }
 h1 {
+  font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #3E2A1F, #3E2A1F);
-  -webkit-background-clip: text;
-  color:#3E2A1F;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--brown);
 }
 .form-box {
-  background: rgba(81, 54, 32, 0.9);
+  background: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(212, 165, 116, 0.25);
+  border-radius: 16px;
+  border: 1px solid var(--beige-dark);
+  box-shadow: 0 2px 12px rgba(107,58,42,0.06);
 }
 .form-group { margin-bottom: 1rem; }
 .form-group label {
   display: block;
   margin-bottom: 0.35rem;
   font-size: 0.9rem;
-  color: #f4e5c2;
+  color: var(--brown);
 }
 .form-group input,
 .form-group select,
@@ -51,34 +61,34 @@ h1 {
   width: 100%;
   padding: 0.65rem 0.85rem;
   border-radius: 8px;
-  border: 1px solid rgba(212, 165, 116, 0.35);
-  background: rgba(50, 38, 30, 0.8);
-  color: #f5e6d3;
+  border: 1px solid var(--beige-dark);
+  background: var(--white);
+  color: var(--text);
   font-size: 1rem;
 }
 .form-group textarea { min-height: 100px; resize: vertical; }
 .form-group input::placeholder,
-.form-group textarea::placeholder { color: #c89b5f; }
+.form-group textarea::placeholder { color: var(--muted); }
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #d4a574;
+  border-color: var(--gold);
 }
-.form-hint { font-size: 0.8rem; color: #c89b5f; margin-top: 0.25rem; }
-.form-error { color: #e88; font-size: 0.85rem; margin-top: 0.25rem; }
+.form-hint { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+.form-error { color: #c0392b; font-size: 0.85rem; margin-top: 0.25rem; }
 
 .photo-zone {
-  border: 2px dashed rgba(212, 165, 116, 0.4);
+  border: 2px dashed var(--beige-dark);
   border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
-  background: rgba(50, 38, 30, 0.4);
+  background: var(--beige);
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
 }
 .photo-zone:hover,
-.photo-zone.dragover { border-color: #d4a574; background: rgba(212, 165, 116, 0.1); }
+.photo-zone.dragover { border-color: var(--gold); background: rgba(197, 151, 58, 0.1); }
 .photo-zone input[type="file"] { display: none; }
 .photo-preview {
   display: flex;
@@ -91,7 +101,7 @@ h1 {
   height: 80px;
   border-radius: 8px;
   object-fit: cover;
-  border: 1px solid rgba(212, 165, 116, 0.3);
+  border: 1px solid var(--beige-dark);
 }
 .photo-preview .remove {
   position: absolute;
@@ -101,7 +111,7 @@ h1 {
   height: 22px;
   border-radius: 50%;
   border: none;
-  background: rgba(0,0,0,0.6);
+  background: rgba(26,16,9,0.65);
   color: #fff;
   font-size: 14px;
   cursor: pointer;
@@ -114,15 +124,15 @@ h1 {
   margin-top: 0.5rem;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #d4a574, #f4e5c2);
-  color: #3d2817;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: var(--white);
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
 }
 .submit-btn:hover { opacity: 0.95; }
 .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.msg-success { color: #8d8; margin-top: 1rem; }
+.msg-success { color: #3f8f3f; margin-top: 1rem; }
 @media (max-width: 480px) {
   .form-box { padding: 1rem; }
 }

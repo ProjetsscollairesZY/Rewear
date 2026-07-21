@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Article - REWEAR DZ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/index.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="styles/article.css">
@@ -18,12 +19,14 @@
         <a href="signin.html" class="nav-btn btn-primary">S'inscrire</a>
       </div>
       <div class="only-auth" id="auth-nav">
+        <a href="admin/index.html" id="admin-link" style="display:none;" class="nav-btn">Administration</a>
         <a href="../roles/vendeur/publier.html" class="btn-publish">+ Publier</a>
         <div class="user-menu">
           <div class="user-avatar" id="avatar-btn">?</div>
           <div class="dropdown" id="dropdown">
             <div class="dropdown-header">
               <div class="username" id="dd-username">Chargement…</div>
+              <div class="user-rating" id="dd-rating"></div>
             </div>
             <a href="profile.html"><span class="icon">👤</span> Mon profil</a>
             <a href="myarticles.html"><span class="icon">📦</span> Mes annonces</a>
@@ -74,7 +77,7 @@
     <h3>🚩 Signaler ce vendeur</h3>
     <div class="modal-field">
       <label>Motif *</label>
-      <select id="repExcuse" style="width:100%;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid rgba(212,165,116,0.3);background:rgb(86, 49, 21);color:#f4dba2;font-size:0.88rem;outline:none;font-family:inherit;">
+      <select id="repExcuse" style="width:100%;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid var(--beige-dark);background:var(--white);color:var(--text);font-size:0.88rem;outline:none;font-family:inherit;">
         <option value="">-- Choisir un motif --</option>
         <option value="arnaque">Arnaque / Fraude</option>
         <option value="faux_article">Article faux ou mal décrit</option>
@@ -86,12 +89,12 @@
 
     <div class="modal-field">
       <label>Commentaire (optionnel)</label>
-      <textarea id="repComment" placeholder="Décrivez le problème..." style="width:100%;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid rgba(212,165,116,0.3);background:rgba(255,255,255,0.06);color:#f4e5c2;font-size:0.88rem;resize:vertical;min-height:80px;outline:none;font-family:inherit;"></textarea>
+      <textarea id="repComment" placeholder="Décrivez le problème..." style="width:100%;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid var(--beige-dark);background:var(--white);color:var(--text);font-size:0.88rem;resize:vertical;min-height:80px;outline:none;font-family:inherit;"></textarea>
     </div>
     <p class="modal-error" id="repError"></p>
     <div class="modal-actions">
       <button class="btn-modal-cancel" id="repCancel">Annuler</button>
-      <button class="btn-modal-send" id="repSend" style="background:linear-gradient(135deg,#e07070,#f4a0a0);color:#3d1717;">Signaler</button>
+      <button class="btn-modal-send" id="repSend" style="background:linear-gradient(135deg,#c0392b,#e0776b);color:#fff;">Signaler</button>
     </div>
     
   </div>
@@ -107,7 +110,7 @@
   (function () {
     var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
     var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
-    var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    var client = window.supabaseClient || (window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
 
     var params    = new URLSearchParams(window.location.search);
     var articleId = params.get('id');
@@ -116,7 +119,20 @@
 
    
     /* ── Helpers ── */
-function esc(s) { return (String(s||'')).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }    function initials(n) {
+function esc(s) { return (String(s||'')).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    var WILAYA_NAMES = ['Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Bejaia','Biskra','Bechar','Blida','Bouira','Tamanrasset','Tebessa','Tlemcen','Tiaret','Tizi Ouzou','Alger','Djelfa','Jijel','Setif','Saida','Skikda','Sidi Bel Abbes','Annaba','Guelma','Constantine','Medea','Mostaganem',"M'Sila",'Mascara','Ouargla','Oran','El Bayadh','Illizi','Bordj Bou Arreridj','Boumerdes','El Tarf','Tindouf','Tissemsilt','El Oued','Khenchela','Souk Ahras','Tipaza','Mila','Ain Defla','Naama','Ain Temouchent','Ghardaia','Relizane','Timimoun','Bordj Badji Mokhtar','Ouled Djellal','Beni Abbes','In Salah','In Guezzam','Touggourt','Djanet',"El M'Ghair",'El Meniaa'];
+    function wilayaLabel(v) {
+      if (!v) return '';
+      v = String(v).trim();
+      if (/^\d{1,2}$/.test(v)) {
+        var n = parseInt(v, 10);
+        if (n >= 1 && n <= WILAYA_NAMES.length) return WILAYA_NAMES[n - 1];
+      }
+      return v;
+    }
+    var ICON_INSTA = '<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-3px;margin-right:2px"><rect width="24" height="24" rx="6" fill="#E4405F"/><rect x="6" y="6" width="12" height="12" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="16.1" cy="7.9" r="0.9" fill="#fff"/></svg>';
+    var ICON_FB    = '<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-3px;margin-right:2px"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M15.5 8.5h-1.6c-.5 0-1 .3-1 1v1.6h2.5l-.3 2.4h-2.2V21h-2.7v-7.5H8.3v-2.4h2v-1.9c0-2 1.2-3.2 3.2-3.2h2v2.5z" fill="#fff"/></svg>';
+    function initials(n) {
       if (!n) return '?';
       var p = n.trim().split(' ');
       return p.length >= 2 ? (p[0][0]+p[1][0]).toUpperCase() : n[0].toUpperCase();
@@ -201,8 +217,8 @@ client.auth.getSession().then(function(sessionResult) {
       /* Badges */
       var badges = '';
       if (a.etat)   badges += '<span class="badge">🏷️ '+esc(a.etat)+'</span>';
-      if (a.taille) badges += '<span class="badge">📏 '+esc(a.taille)+'</span>';
-      if (a.wilaya) badges += '<span class="badge">📍 '+esc(a.wilaya)+'</span>';
+      if (a.taille) badges += '<span class="badge">📏 Taille : '+esc(a.taille)+'</span>';
+      if (a.wilaya) badges += '<span class="badge">📍 '+esc(wilayaLabel(a.wilaya))+'</span>';
 
       var date = a.created_at
         ? new Date(a.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})
@@ -211,12 +227,12 @@ client.auth.getSession().then(function(sessionResult) {
       /* Seller contacts */
       var sellerName = profile.username || 'Vendeur';
       var contacts = '';
-      if (profile.phone)     contacts += '<a class="contact-chip" href="tel:'+profile.phone+'">📞 '+esc(profile.phone)+'</a>';
+      if (profile.phone)     contacts += '<a class="contact-chip" href="tel:'+esc(profile.phone)+'">📞 '+esc(profile.phone)+'</a>';
       if (profile.instagram) {
         var h = profile.instagram.replace(/^@/,'');
-        contacts += '<a class="contact-chip insta" href="'+safeUrl(h,'https://instagram.com/')+'" target="_blank" rel="noopener">📸 @'+esc(h)+'</a>';
+        contacts += '<a class="contact-chip insta" href="'+safeUrl(h,'https://instagram.com/')+'" target="_blank" rel="noopener">'+ICON_INSTA+'@'+esc(h)+'</a>';
       }
-      if (profile.facebook)  contacts += '<a class="contact-chip fb" href="'+safeUrl(profile.facebook,'https://facebook.com/')+'" target="_blank" rel="noopener">🔵 '+esc(profile.facebook.replace(/^@/,''))+'</a>';
+      if (profile.facebook)  contacts += '<a class="contact-chip fb" href="'+safeUrl(profile.facebook,'https://facebook.com/')+'" target="_blank" rel="noopener">'+ICON_FB+esc(profile.facebook.replace(/^@/,''))+'</a>';
       if (!contacts)         contacts  = '<span class="contact-chip no-contact">Aucun contact renseigné</span>';
 
       /* Rating */
@@ -264,7 +280,7 @@ card.innerHTML =
     '<h1>'+esc(a.title)+'</h1>' +
     '<div class="detail-price">'+Number(a.price||0).toLocaleString('fr-DZ')+' DA</div>' +
     '<div class="detail-badges">'+badges+'</div>' +
-    (date ? '<div style="font-size:0.78rem;color:#a07850;">Publié le '+date+'</div>' : '') +
+    (date ? '<div style="font-size:0.78rem;color:var(--muted);">Publié le '+date+'</div>' : '') +
     '<hr class="detail-divider">' +
     '<p class="detail-desc">'+esc(a.description||'Aucune description.')+'</p>' +
     '<div class="action-btns">'+interestBtn+reportBtn+'</div>' +
@@ -275,11 +291,11 @@ wrap.appendChild(card);
       var sellerEl = document.createElement('div');
       sellerEl.className = 'seller-card';
       sellerEl.innerHTML =
-        '<div class="seller-avatar">'+initials(sellerName)+'</div>' +
+        '<a class="seller-avatar" href="seller.html?id='+a.seller_id+'" style="text-decoration:none;">'+initials(sellerName)+'</a>' +
         '<div class="seller-info">' +
-          '<h3>'+esc(sellerName)+'</h3>' +
+          '<h3><a href="seller.html?id='+a.seller_id+'" style="color:inherit;text-decoration:none;">'+esc(sellerName)+'</a></h3>' +
           ratingHtml +
-          '<div class="seller-label">Vendeur REWEAR DZ</div>' +
+          '<div class="seller-label">Vendeur REWEAR DZ · <a href="seller.html?id='+a.seller_id+'" style="color:var(--gold);text-decoration:none;font-weight:600;">Voir le profil complet →</a></div>' +
           '<div class="seller-contacts">'+contacts+'</div>' +
         '</div>';
       wrap.appendChild(sellerEl);
@@ -413,6 +429,9 @@ if (btnReport) {
   btnReport.addEventListener('click', function() {
     if (!currentUser) {
       showToast('Connectez-vous pour signaler.', 'error');
+      setTimeout(function() {
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+      }, 1200);
       return;
     }
     reportModal.classList.add('open');

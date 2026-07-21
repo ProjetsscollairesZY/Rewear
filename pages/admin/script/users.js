@@ -31,6 +31,12 @@
       return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
+    function esc(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
     /* ── Filtrage ── */
     function filtered() {
       var search = (searchEl.value || '').toLowerCase();
@@ -69,9 +75,9 @@
         /* Actions */
         var actionsHtml = '';
         if (isCurrentUser) {
-          actionsHtml = '<span style="font-size:0.75rem;color:#a07850;font-style:italic;">C\'est vous</span>';
+          actionsHtml = '<span style="font-size:0.75rem;color:var(--muted);font-style:italic;">C\'est vous</span>';
         } else if (isAdmin) {
-          actionsHtml = '<span style="font-size:0.75rem;color:#a07850;font-style:italic;">Admin protege</span>';
+          actionsHtml = '<span style="font-size:0.75rem;color:var(--muted);font-style:italic;">Admin protege</span>';
         } else if (isBanned) {
           actionsHtml =
             '<button class="btn-action btn-unban"  data-id="' + u.id + '">Debannir</button>' +
@@ -86,16 +92,16 @@
           '<td><div class="user-cell">' +
             '<div class="avatar-sm' + (isBanned ? ' banned' : '') + '">' + initials(u.username) + '</div>' +
             '<div>' +
-              '<div>' + (u.username || 'Sans nom') + '</div>' +
-              (isBanned && u.ban_reason ? '<div style="font-size:0.72rem;color:#e07070;margin-top:0.15rem;">' + u.ban_reason + '</div>' : '') +
+              '<div>' + esc(u.username || 'Sans nom') + '</div>' +
+              (isBanned && u.ban_reason ? '<div style="font-size:0.72rem;color:#c0392b;margin-top:0.15rem;">' + esc(u.ban_reason) + '</div>' : '') +
             '</div>' +
             
           '</div></td>' +
-          '<td style="color:#c89b5f;">' + (u.email || '—') + '</td>' +
-          '<td style="color:#c89b5f;">' + (u.phone || '—') + '</td>' +
-          '<td style="color:#c89b5f;">' + (u.instagram ? '@' + u.instagram : '—') + '</td>' +
+          '<td style="color:var(--muted);">' + esc(u.email || '—') + '</td>' +
+          '<td style="color:var(--muted);">' + esc(u.phone || '—') + '</td>' +
+          '<td style="color:var(--muted);">' + (u.instagram ? '@' + esc(u.instagram) : '—') + '</td>' +
           '<td><span class="badge-role ' + badgeClass + '">' + badgeLabel + '</span></td>' +
-          '<td style="color:#a07850;">' + formatDate(u.created_at) + '</td>' +
+          '<td style="color:var(--muted);">' + formatDate(u.created_at) + '</td>' +
           '<td><div class="actions-cell">' + actionsHtml + '</div></td>';
 
         /* Bannir → ouvre modal */

@@ -1,0 +1,131 @@
+.page-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.back-link { color: var(--brown); text-decoration: none; font-size: 0.875rem; }
+.back-link:hover { color: var(--gold); }
+
+/* ── SELLER CARD ── */
+.seller-profile-card {
+  background: white;
+  border: 1px solid var(--beige-dark);
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 12px rgba(107,58,42,0.06);
+}
+.seller-avatar-lg {
+  width: 90px; height: 90px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: var(--white); font-size: 2.2rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid rgba(197,151,58,0.5); flex-shrink: 0;
+  user-select: none;
+}
+.seller-profile-info { flex: 1; min-width: 220px; }
+.seller-profile-info h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; color: var(--brown); font-weight: 800; margin-bottom: 0.3rem;
+}
+.seller-banned-tag {
+  display: inline-block; font-size: 0.7rem; font-weight: 700;
+  color: #c0392b; background: rgba(192,57,43,0.1); border: 1px solid rgba(192,57,43,0.3);
+  border-radius: 999px; padding: 0.15rem 0.6rem; margin-left: 0.5rem; vertical-align: middle;
+}
+.seller-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; }
+.seller-rating-line {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 0.85rem; flex-wrap: wrap;
+}
+.stars-display { color: var(--gold); font-size: 1rem; letter-spacing: 1px; }
+.rating-avg { font-weight: 700; color: var(--brown); font-size: 0.9rem; }
+.rating-count { font-size: 0.78rem; color: var(--muted); }
+.seller-contacts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.contact-chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.35rem 0.85rem; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600; text-decoration: none;
+  border: 1px solid rgba(197, 151, 58, 0.3);
+  background: rgba(197, 151, 58, 0.1); color: var(--brown); transition: 0.2s;
+}
+.contact-chip:hover { background: rgba(197, 151, 58, 0.22); }
+.contact-chip.insta { border-color: rgba(214,65,125,0.35); color: #d6417d; background: rgba(214,65,125,0.06); }
+.contact-chip.insta:hover { background: rgba(214,65,125,0.14); }
+.contact-chip.fb { border-color: rgba(66,103,200,0.4); color: #4267c8; background: rgba(66,103,200,0.06); }
+.contact-chip.fb:hover { background: rgba(66,103,200,0.14); }
+.contact-chip.no-contact { color: var(--muted); border-style: dashed; font-style: italic; cursor: default; }
+
+/* ── STATS ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+.stat-card {
+  background: white;
+  border: 1px solid var(--beige-dark);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(107,58,42,0.06);
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 800; color: var(--gold); line-height: 1; margin-bottom: 0.3rem;
+}
+.stat-label { font-size: 0.78rem; color: var(--muted); }
+
+/* ── SECTION ── */
+.section {
+  background: white;
+  border: 1px solid var(--beige-dark);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(107,58,42,0.06);
+}
+.section-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--beige-dark);
+}
+.section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 700; color: var(--brown);
+}
+.seller-articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+/* ── REVIEWS ── */
+.reviews-list { padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.review-item {
+  padding: 0.9rem 1rem;
+  background: var(--beige);
+  border-radius: 10px;
+  border: 1px solid var(--beige-dark);
+}
+.review-top { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
+.review-author { font-weight: 700; font-size: 0.85rem; color: var(--brown); }
+.review-stars { color: var(--gold); font-size: 0.85rem; }
+.review-date { font-size: 0.72rem; color: var(--muted); margin-left: auto; }
+.review-comment { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+.reviews-empty, .empty-state {
+  padding: 2rem 1.5rem; text-align: center; color: var(--muted); font-size: 0.88rem;
+}
+
+.page-loading, .page-error { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+.page-error { color: #c0392b; }
+
+@media (max-width: 640px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .seller-profile-card { flex-direction: column; }
+}

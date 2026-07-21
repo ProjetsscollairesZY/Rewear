@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mes annonces - REWEAR DZ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/index.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="styles/myarticles.css">
@@ -12,10 +13,30 @@
 
   <!-- HEADER -->
   <header>
-    <div class="logo gradient-text">REWEAR DZ</div>
+    <a href="../index.html" class="logo gradient-text">REWEAR DZ</a>
     <div class="nav-right">
-      <a href="../index.html" class="nav-btn">Accueil</a>
-      <a href="../roles/vendeur/publier.html" class="btn-primary nav-btn">+ Publier</a>
+      <div class="only-guest" id="guest-nav">
+        <a href="login.html" class="nav-btn">Se connecter</a>
+        <a href="signin.html" class="nav-btn btn-primary">S'inscrire</a>
+      </div>
+      <div class="only-auth" id="auth-nav">
+        <a href="admin/index.html" id="admin-link" style="display:none;" class="nav-btn">Administration</a>
+        <a href="../roles/vendeur/publier.html" class="btn-publish">+ Publier</a>
+        <div class="user-menu">
+          <div class="user-avatar" id="avatar-btn">?</div>
+          <div class="dropdown" id="dropdown">
+            <div class="dropdown-header">
+              <div class="username" id="dd-username">Chargement...</div>
+              <div class="user-rating" id="dd-rating"></div>
+            </div>
+            <a href="profile.html"><span class="icon">👤</span> Mon profil</a>
+            <a href="myarticles.html"><span class="icon">📦</span> Mes annonces</a>
+            <button class="dd-item logout-btn" id="logout-btn">
+              <span class="icon">🚪</span> Se déconnecter
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -37,6 +58,7 @@
       <div class="stat-pill"><div class="num" id="statTotal">—</div><div class="lbl">Total</div></div>
       <div class="stat-pill"><div class="num" id="statActive">—</div><div class="lbl">Actives</div></div>
       <div class="stat-pill"><div class="num" id="statInactive">—</div><div class="lbl">Inactives</div></div>
+      <div class="stat-pill"><div class="num" id="statSold">—</div><div class="lbl">Vendues</div></div>
     </div>
 
     <!-- FILTER TABS -->
@@ -44,6 +66,7 @@
       <button class="tab-btn active" data-filter="all">Toutes</button>
       <button class="tab-btn" data-filter="active">Actives</button>
       <button class="tab-btn" data-filter="inactive">Inactives</button>
+      <button class="tab-btn" data-filter="sold">Vendues</button>
     </div>
 
     <!-- LIST -->
