@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profil vendeur - REWEAR DZ</title>
+  <title>Messages - REWEAR DZ</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/index.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="styles/seller.css">
+  <link rel="stylesheet" href="styles/messages.css">
 </head>
 <body>
 
@@ -41,12 +41,51 @@
     </div>
   </header>
 
-  <div class="page-wrap" id="pageWrap">
-    <a href="../index.html" class="back-link">← Retour aux annonces</a>
-    <div class="page-loading" id="pageLoading">Chargement du profil...</div>
+  <div class="msg-page" id="msgPage">
+
+    <!-- LISTE DES CONVERSATIONS -->
+    <div class="conv-list" id="convList">
+      <div class="conv-list-header">
+        <h1>💬 Messages</h1>
+      </div>
+      <div class="conv-items" id="convItems">
+        <div class="loading-msg">Chargement des conversations...</div>
+      </div>
+      <div class="conv-empty" id="convEmpty" style="display:none;">
+        <p>Aucune conversation pour le moment.</p>
+        <a href="../index.html" class="back-link">← Parcourir les annonces</a>
+      </div>
+    </div>
+
+    <!-- FIL DE DISCUSSION -->
+    <div class="thread-view" id="threadView">
+      <div class="thread-placeholder" id="threadPlaceholder">
+        <div class="placeholder-icon">💬</div>
+        <p>Sélectionnez une conversation pour l'afficher ici.</p>
+      </div>
+
+      <div class="thread-active" id="threadActive" style="display:none;">
+        <div class="thread-header">
+          <button class="btn-thread-back" id="btnThreadBack">←</button>
+          <a class="thread-user" id="threadUserLink" href="#">
+            <div class="thread-avatar" id="threadAvatar">?</div>
+            <div class="thread-user-info">
+              <div class="thread-username" id="threadUsername">—</div>
+              <div class="thread-article" id="threadArticle"></div>
+            </div>
+          </a>
+        </div>
+        <div class="thread-messages" id="threadMessages"></div>
+        <form class="thread-input-row" id="threadForm">
+          <input type="text" id="threadInput" placeholder="Écrire un message..." maxlength="1000" autocomplete="off">
+          <button type="submit" id="threadSend">Envoyer</button>
+        </form>
+      </div>
+    </div>
+
   </div>
 
   <script src="../script/auth.js"></script>
-  <script src="../script/seller.js"></script>
+  <script src="../script/messages.js"></script>
 </body>
 </html>

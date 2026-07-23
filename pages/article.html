@@ -30,6 +30,7 @@
             </div>
             <a href="profile.html"><span class="icon">👤</span> Mon profil</a>
             <a href="myarticles.html"><span class="icon">📦</span> Mes annonces</a>
+            <a href="messages.html"><span class="icon">💬</span> Messages<span class="nav-msg-badge" id="navMsgBadge" style="display:none;"></span></a>
          
             <button class="dd-item logout-btn" id="logout-btn">
               <span class="icon">🚪</span> Se déconnecter
@@ -261,6 +262,11 @@ var interestBtn = isOwn
   ? ''
   : '<button class="btn-interest" id="btnInterest">🛒 Je suis intéressé(e)</button>';
 
+/* Message button */
+var messageBtn = isOwn
+  ? ''
+  : '<button class="btn-message" id="btnMessage">💬 Envoyer un message</button>';
+
 /* Report button */
 var reportBtn = isOwn
   ? ''
@@ -283,7 +289,7 @@ card.innerHTML =
     (date ? '<div style="font-size:0.78rem;color:var(--muted);">Publié le '+date+'</div>' : '') +
     '<hr class="detail-divider">' +
     '<p class="detail-desc">'+esc(a.description||'Aucune description.')+'</p>' +
-    '<div class="action-btns">'+interestBtn+reportBtn+'</div>' +
+    '<div class="action-btns">'+interestBtn+messageBtn+reportBtn+'</div>' +
   '</div>';
 wrap.appendChild(card);
 
@@ -421,6 +427,21 @@ wrap.appendChild(card);
           if (btnInterest) { btnInterest.disabled = true; btnInterest.textContent = '✅ Intérêt envoyé'; }
         });
       });
+/* Bouton message */
+var btnMessage = document.getElementById('btnMessage');
+if (btnMessage) {
+  btnMessage.addEventListener('click', function() {
+    if (!currentUser) {
+      showToast('Connectez-vous pour envoyer un message.', 'error');
+      setTimeout(function() {
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+      }, 1200);
+      return;
+    }
+    window.location.href = 'messages.html?article=' + articleId + '&with=' + a.seller_id;
+  });
+}
+
 /* Report modal */
 var reportModal = document.getElementById('reportModal');
 var btnReport   = document.getElementById('btnReport');

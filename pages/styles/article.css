@@ -86,6 +86,16 @@
     }
     .btn-interest:hover { opacity: 0.9; }
     .btn-interest:disabled { opacity: 0.5; cursor: default; }
+    .btn-message {
+      flex: 1;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      background: var(--beige);
+      border: 1px solid var(--beige-dark);
+      color: var(--brown); font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-message:hover { background: var(--beige-dark); }
 
     /* ── SELLER CARD ── */
     .seller-card {

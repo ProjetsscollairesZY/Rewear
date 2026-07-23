@@ -152,6 +152,27 @@ async function checkAuth() {
 }
 
 // ==============================
+// BADGE MESSAGES NON LUS
+// ==============================
+function updateUnreadMessagesBadge(userId) {
+  var badge = document.getElementById('navMsgBadge');
+  if (!badge) return;
+  supabaseClient.from('messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('receiver_id', userId)
+    .eq('is_read', false)
+    .then(function (r) {
+      var n = (!r.error && r.count) ? r.count : 0;
+      if (n > 0) {
+        badge.textContent = n > 9 ? '9+' : String(n);
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    });
+}
+
+// ==============================
 // MISE À JOUR DU HEADER
 // ==============================
 function updateNav(user) {
@@ -171,6 +192,8 @@ function updateNav(user) {
     var name = (user.user_metadata && user.user_metadata.username) || user.email || 'Profil';
     if (ddUsername) ddUsername.textContent = name;
     if (avatarBtn)  avatarBtn.textContent  = name[0].toUpperCase();
+
+    updateUnreadMessagesBadge(user.id);
 
   } else {
     guestNav.style.display = 'flex';
