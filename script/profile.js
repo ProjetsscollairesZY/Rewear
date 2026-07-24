@@ -120,7 +120,7 @@
         card.className = 'article-card';
 
         var imgHtml = (a.images && a.images.length > 0)
-          ? '<img src="' + a.images[0] + '" alt="' + a.title + '" loading="lazy">'
+          ? '<img src="' + esc(a.images[0]) + '" alt="' + esc(a.title) + '" loading="lazy">'
           : '<div class="article-card-img-placeholder">📦</div>';
 
         card.innerHTML =
