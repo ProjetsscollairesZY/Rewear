@@ -110,8 +110,11 @@
       var c = conversations[key];
       var otherProfile = profilesCache[c.otherId] || {};
       var article = c.articleId ? (articlesCache[c.articleId] || {}) : null;
-      var lastMsg = c.messages[c.messages.length - 1];
+      var lastMsg = c.messages.length ? c.messages[c.messages.length - 1] : null;
       var name = otherProfile.username || 'Utilisateur';
+      var previewText = lastMsg
+        ? ((lastMsg.sender_id === user.id ? 'Vous : ' : '') + esc(lastMsg.content))
+        : 'Nouvelle conversation';
 
       var el = document.createElement('div');
       el.className = 'conv-item' + (c.unread > 0 ? ' unread' : '') + (key === activeKey ? ' active' : '');
@@ -120,10 +123,10 @@
         '<div class="conv-info">' +
           '<div class="conv-top-row">' +
             '<span class="conv-name">' + esc(name) + '</span>' +
-            '<span class="conv-time">' + formatTime(lastMsg.created_at) + '</span>' +
+            '<span class="conv-time">' + (lastMsg ? formatTime(lastMsg.created_at) : '') + '</span>' +
           '</div>' +
           (article ? '<div class="conv-article">🛍️ ' + esc(article.title || '') + '</div>' : '') +
-          '<div class="conv-preview">' + (lastMsg.sender_id === user.id ? 'Vous : ' : '') + esc(lastMsg.content) + '</div>' +
+          '<div class="conv-preview">' + previewText + '</div>' +
         '</div>' +
         (c.unread > 0 ? '<div class="conv-unread-dot"></div>' : '');
 
