@@ -6,16 +6,6 @@
   var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
 
-  /* ── Auth ── */
-  var user = (function () {
-    try { var u = localStorage.getItem('user'); return u ? JSON.parse(u) : null; }
-    catch (e) { return null; }
-  })();
-  if (!user) {
-    window.location.href = '../pages/login.html?redirect=' + encodeURIComponent(window.location.pathname);
-    return;
-  }
-
   var client = window.supabaseClient || (window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
 
   var ICON_INSTA = '<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-3px"><rect width="24" height="24" rx="6" fill="#E4405F"/><rect x="6" y="6" width="12" height="12" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="16.1" cy="7.9" r="0.9" fill="#fff"/></svg>';
@@ -48,6 +38,8 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
+
+  function init(user) {
 
   /* ── Fill profile (base) ── */
   var username = user.username
@@ -248,9 +240,9 @@
         return;
       }
 
-      /* Update localStorage */
-      user.username = newName;
-      localStorage.setItem('user', JSON.stringify(user));
+      /* Update localStorage (cache léger utilisé ailleurs pour un affichage rapide,
+         l'accès aux pages protégées ne dépend plus de cette valeur) */
+      localStorage.setItem('user', JSON.stringify({ id: user.id, username: newName }));
       document.getElementById('profileName').textContent  = newName;
       document.getElementById('avatarCircle').textContent = initials(newName);
       username = newName;
@@ -275,6 +267,17 @@
     client.auth.signOut().finally(function () {
       window.location.href = '../index.html';
     });
+  });
+
+  } // fin init()
+
+  /* ── Auth : attend la vraie session Supabase (voir auth.js) avant d'agir ── */
+  Promise.resolve(window.authReady).then(function (user) {
+    if (!user) {
+      window.location.href = '../pages/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+      return;
+    }
+    init(user);
   });
 
 })();

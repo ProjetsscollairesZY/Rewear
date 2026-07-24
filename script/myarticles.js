@@ -6,10 +6,8 @@
   var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
 
-  /* ── Auth ── */
+  /* ── Auth (assigné une fois la vraie session Supabase vérifiée, voir plus bas) ── */
   var user = null;
-  try { user = JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) {}
-  if (!user) { window.location.href = '../pages/login.html'; return; }
 
   /* ── Supabase client ── */
   if (typeof supabase !== 'undefined' && !window.supabaseClient)
@@ -303,7 +301,11 @@ function renderInterests(interests, panel, articleId, badge) {
     });
   });
 
-  /* ── Init ── */
-  load();
+  /* ── Auth : attend la vraie session Supabase (voir auth.js) avant de charger ── */
+  Promise.resolve(window.authReady).then(function (authUser) {
+    if (!authUser) { window.location.href = '../pages/login.html?redirect=' + encodeURIComponent(window.location.pathname); return; }
+    user = authUser;
+    load();
+  });
 
 })();

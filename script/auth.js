@@ -244,13 +244,19 @@ async function initAuth() {
       var isInSubfolder = window.location.pathname.includes('/pages/') ||
                           window.location.pathname.includes('/roles/');
       window.location.href = (isInSubfolder ? '../' : '') + 'banned.html?reason=' + reason;
-      return;
+      return null; // banni → traité comme non authentifié pour tout le reste
     }
   }
 
   updateNav(user);
   if (!user) console.log("Non connecté");
   else console.log("Connecté :", user.email);
+  return user;
 }
 
-initAuth();
+// Promesse partagée : résout avec l'utilisateur Supabase authentifié ET non-banni
+// (ou null), une fois la session réelle vérifiée côté serveur. Les pages qui exigent
+// une connexion doivent attendre window.authReady avant d'agir, au lieu de se fier
+// uniquement à localStorage('user') — qui peut rester présent après l'expiration
+// ou la révocation de la vraie session Supabase.
+window.authReady = initAuth();

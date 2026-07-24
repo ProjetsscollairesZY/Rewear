@@ -1,14 +1,4 @@
 (function() {
-  var user = (function() {
-    try {
-      var u = localStorage.getItem('user');
-      return u ? JSON.parse(u) : null;
-    } catch (e) { return null; }
-  })();
-  if (!user) {
-    window.location.href = '../../pages/login.html?redirect=' + encodeURIComponent(window.location.pathname);
-    return;
-  }
   if (typeof supabase !== 'undefined' && !window.supabaseClient) {
     window.supabaseClient = supabase.createClient(
       'https://eviqzvrwjxmhwsylswqi.supabase.co',
@@ -120,6 +110,8 @@
     if (selectedId) sel.value = selectedId;
   }
 
+  function init(user) {
+
   if (editId) {
     /* ── Pré-remplissage du formulaire à partir de l'annonce existante ── */
     var titleEl = document.querySelector('h1.pub');
@@ -216,5 +208,16 @@
         errEl.style.display = 'block';
         showPhotoError(msg.indexOf('photo') !== -1 ? msg : '');
       });
+  });
+
+  } // fin init()
+
+  /* ── Auth : attend la vraie session Supabase (voir auth.js) avant de charger ── */
+  Promise.resolve(window.authReady).then(function (user) {
+    if (!user) {
+      window.location.href = '../../pages/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+      return;
+    }
+    init(user);
   });
 })();

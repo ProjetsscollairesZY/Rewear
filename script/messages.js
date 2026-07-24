@@ -5,9 +5,7 @@
   var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
 
-  var user = null;
-  try { user = JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) {}
-  if (!user) { window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
+  var user = null; // assigné une fois la vraie session Supabase vérifiée, voir l'init tout en bas
 
   var client = window.supabaseClient || (window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
 
@@ -340,24 +338,32 @@
     });
   }
 
-  /* ── Init ── */
-  var initTs = new Date().toISOString();
-  loadConversations()
-    .then(ensureDeepLinkConversation)
-    .then(function () {
-      renderConvList();
-      if (deepWithId) {
-        var key = convKey(deepArticleId, deepWithId);
-        if (conversations[key]) openConversation(key);
-      }
-      return setupRealtime();
-    })
-    .then(function () {
-      return reconcileMissedMessages(initTs);
-    })
-    .catch(function (err) {
-      console.error('messages.js', err);
-      convItemsEl.innerHTML = '<div class="loading-msg">Erreur de chargement des messages.</div>';
-    });
+  /* ── Auth : attend la vraie session Supabase (voir auth.js) avant de charger ── */
+  Promise.resolve(window.authReady).then(function (authUser) {
+    if (!authUser) {
+      window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+      return;
+    }
+    user = authUser;
+
+    var initTs = new Date().toISOString();
+    loadConversations()
+      .then(ensureDeepLinkConversation)
+      .then(function () {
+        renderConvList();
+        if (deepWithId) {
+          var key = convKey(deepArticleId, deepWithId);
+          if (conversations[key]) openConversation(key);
+        }
+        return setupRealtime();
+      })
+      .then(function () {
+        return reconcileMissedMessages(initTs);
+      })
+      .catch(function (err) {
+        console.error('messages.js', err);
+        convItemsEl.innerHTML = '<div class="loading-msg">Erreur de chargement des messages.</div>';
+      });
+  });
 
 })();

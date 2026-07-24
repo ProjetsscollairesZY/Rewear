@@ -5,11 +5,6 @@
   var SUPABASE_URL = 'https://eviqzvrwjxmhwsylswqi.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aXF6dnJ3anhtaHdzeWxzd3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzk3ODAsImV4cCI6MjA4OTAxNTc4MH0.8N-e6_OHRseAZ9PvAjDV7vspJsj2qDHk6bjLfz21BZ0';
 
-  /* ── Auth ── */
-  var user = null;
-  try { user = JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) {}
-  if (!user) { window.location.href = '../pages/login.html'; return; }
-
   var client  = window.supabaseClient || (window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
   var gridEl  = document.getElementById('favGrid');
   var emptyEl = document.getElementById('emptyState');
@@ -23,6 +18,13 @@
     setTimeout(function () { t.className = 'toast'; }, 3000);
   }
 
+  /* ── Auth : attend la vraie session Supabase (voir auth.js) avant d'agir ── */
+  Promise.resolve(window.authReady).then(function (user) {
+    if (!user) { window.location.href = '../pages/login.html?redirect=' + encodeURIComponent(window.location.pathname); return; }
+    init(user);
+  });
+
+  function init(user) {
   /* ── Load ── */
   client.from('favorites')
     .select('id, article_id, articles(id, title, price, etat, images)')
@@ -82,5 +84,6 @@
     .catch(function () {
       gridEl.innerHTML = '<div class="loading-state" style="grid-column:1/-1;color:#c0392b;">Erreur de chargement.</div>';
     });
+  }
 
 })();
