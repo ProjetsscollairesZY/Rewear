@@ -2,9 +2,11 @@ html, body { height: 100%; }
 
 .msg-page {
   display: flex;
-  height: calc(100vh - 60px);
+  flex: 1;
+  min-height: 0;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
   border-left: 1px solid var(--beige-dark);
   border-right: 1px solid var(--beige-dark);
   background: white;
@@ -96,6 +98,7 @@ html, body { height: 100%; }
   border-bottom: 1px solid var(--beige-dark);
   background: white;
   flex-shrink: 0;
+  min-width: 0;
 }
 .btn-thread-back {
   display: none;
@@ -105,6 +108,7 @@ html, body { height: 100%; }
   color: var(--brown);
   cursor: pointer;
   padding: 0.25rem 0.5rem;
+  flex-shrink: 0;
 }
 .thread-user {
   display: flex;
@@ -112,15 +116,25 @@ html, body { height: 100%; }
   gap: 0.65rem;
   text-decoration: none;
   color: inherit;
+  min-width: 0;
+  flex: 1;
 }
 .thread-avatar {
   width: 38px; height: 38px; border-radius: 50%;
   background: linear-gradient(135deg, var(--gold), var(--gold-light));
   color: var(--white); font-weight: 800; font-size: 0.95rem;
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.thread-username { font-weight: 700; font-size: 0.92rem; color: var(--brown); }
-.thread-article { font-size: 0.75rem; color: var(--gold); }
+.thread-user-info { min-width: 0; flex: 1; }
+.thread-username {
+  font-weight: 700; font-size: 0.92rem; color: var(--brown);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.thread-article {
+  font-size: 0.75rem; color: var(--gold);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
 
 .thread-messages {
   flex: 1;
@@ -214,7 +228,7 @@ html, body { height: 100%; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 720px) {
-  .msg-page { height: calc(100vh - 56px); border: none; }
+  .msg-page { border: none; }
   .conv-list { width: 100%; border-right: none; }
   .thread-view { display: none; }
   .btn-thread-back { display: inline-block; }

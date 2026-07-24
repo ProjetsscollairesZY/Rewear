@@ -39,8 +39,9 @@
   function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function initials(n) {
     if (!n) return '?';
-    var p = n.trim().split(' ');
-    return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : n[0].toUpperCase();
+    var p = n.trim().split(/\s+/).filter(Boolean);
+    if (p.length === 0) return '?';
+    return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : p[0][0].toUpperCase();
   }
   function convKey(articleId, otherId) { return (articleId || 'none') + '::' + otherId; }
   function formatTime(d) {
@@ -81,7 +82,7 @@
         });
 
         var fetches = [];
-        if (userIds.length)    fetches.push(client.from('profiles').select('id,username').in('id', userIds));
+        if (userIds.length)    fetches.push(client.from('profiles').select('id,username,is_banned').in('id', userIds));
         else                   fetches.push(Promise.resolve({ data: [] }));
         if (articleIds.length) fetches.push(client.from('articles').select('id,title,images').in('id', articleIds));
         else                   fetches.push(Promise.resolve({ data: [] }));
@@ -140,6 +141,7 @@
     var c = conversations[key];
     if (!c) return;
     activeKey = key;
+    threadInput.value = '';
     msgPage.classList.add('thread-open');
 
     var otherProfile = profilesCache[c.otherId] || {};
@@ -150,8 +152,14 @@
     threadActive.style.display = 'flex';
     threadAvatar.textContent = initials(name);
     threadUsername.textContent = name;
-    threadArticleEl.textContent = article ? ('À propos de : ' + (article.title || '')) : '';
+    threadArticleEl.textContent = otherProfile.is_banned
+      ? 'Compte suspendu'
+      : (article ? ('À propos de : ' + (article.title || '')) : '');
     threadUserLink.href = 'seller.html?id=' + c.otherId;
+
+    threadInput.disabled = !!otherProfile.is_banned;
+    threadSend.disabled  = !!otherProfile.is_banned;
+    threadInput.placeholder = otherProfile.is_banned ? 'Compte suspendu — envoi impossible' : 'Écrire un message...';
 
     renderMessages(c);
     renderConvList();
@@ -192,7 +200,18 @@
       if (m) m.is_read = true;
     });
     c.unread = 0;
-    client.from('messages').update({ is_read: true }).in('id', unreadIds).then(function () {});
+    client.from('messages').update({ is_read: true }).in('id', unreadIds).then(function (r) {
+      if (r.error) {
+        console.error('markConversationRead failed', r.error);
+        // Revert l'état optimiste : le message reste marqué non lu côté serveur
+        unreadIds.forEach(function (id) {
+          var m = c.messages.find(function (mm) { return mm.id === id; });
+          if (m) m.is_read = false;
+        });
+        c.unread = unreadIds.length;
+        renderConvList();
+      }
+    });
   }
 
   /* ── Envoyer un message ── */
@@ -201,6 +220,12 @@
     var text = threadInput.value.trim();
     if (!text || !activeKey) return;
     var c = conversations[activeKey];
+
+    var otherProfile = profilesCache[c.otherId];
+    if (otherProfile && otherProfile.is_banned) {
+      alert('Ce compte a été suspendu, vous ne pouvez plus lui envoyer de message.');
+      return;
+    }
 
     threadSend.disabled = true;
     client.from('messages').insert({
@@ -230,7 +255,7 @@
     var key = convKey(deepArticleId, deepWithId);
     if (conversations[key]) return Promise.resolve();
 
-    var fetches = [client.from('profiles').select('id,username').eq('id', deepWithId).maybeSingle()];
+    var fetches = [client.from('profiles').select('id,username,is_banned').eq('id', deepWithId).maybeSingle()];
     if (deepArticleId) fetches.push(client.from('articles').select('id,title,images').eq('id', deepArticleId).maybeSingle());
 
     return Promise.all(fetches).then(function (results) {
@@ -243,13 +268,41 @@
   /* ── Temps réel ── */
   function setupRealtime() {
     if (realtimeChannel) client.removeChannel(realtimeChannel);
-    realtimeChannel = client.channel('messages-inbox-' + user.id)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'messages', filter: 'receiver_id=eq.' + user.id
-      }, function (payload) {
-        handleIncomingMessage(payload.new);
-      })
-      .subscribe();
+    return new Promise(function (resolve) {
+      realtimeChannel = client.channel('messages-inbox-' + user.id)
+        .on('postgres_changes', {
+          event: 'INSERT', schema: 'public', table: 'messages', filter: 'receiver_id=eq.' + user.id
+        }, function (payload) {
+          handleIncomingMessage(payload.new);
+        })
+        .subscribe(function (status) {
+          if (status === 'SUBSCRIBED') resolve();
+        });
+      // Filet de sécurité : si l'abonnement n'a pas confirmé après 4s, on continue quand même
+      // (la reconciliation par timestamp qui suit couvrira les messages manqués).
+      setTimeout(resolve, 4000);
+    });
+  }
+
+  /* Récupère les messages arrivés pendant la fenêtre entre le chargement initial
+     et l'activation effective du canal temps réel (sinon ils resteraient invisibles
+     jusqu'au prochain rechargement de la page). */
+  function reconcileMissedMessages(sinceTs) {
+    return client.from('messages')
+      .select('id,article_id,sender_id,receiver_id,content,is_read,created_at')
+      .or('sender_id.eq.' + user.id + ',receiver_id.eq.' + user.id)
+      .gt('created_at', sinceTs)
+      .order('created_at', { ascending: true })
+      .then(function (r) {
+        if (r.error || !r.data) return;
+        r.data.forEach(function (m) {
+          var otherId = m.sender_id === user.id ? m.receiver_id : m.sender_id;
+          var key = convKey(m.article_id, otherId);
+          var c = conversations[key];
+          if (c && c.messages.some(function (mm) { return mm.id === m.id; })) return; // déjà reçu via realtime
+          handleIncomingMessage(m);
+        });
+      });
   }
 
   function handleIncomingMessage(m) {
@@ -278,7 +331,7 @@
     if (!missingProfile && !missingArticle) { afterInsert(); return; }
 
     var fetches = [];
-    fetches.push(missingProfile ? client.from('profiles').select('id,username').eq('id', otherId).maybeSingle() : Promise.resolve(null));
+    fetches.push(missingProfile ? client.from('profiles').select('id,username,is_banned').eq('id', otherId).maybeSingle() : Promise.resolve(null));
     fetches.push(missingArticle ? client.from('articles').select('id,title,images').eq('id', m.article_id).maybeSingle() : Promise.resolve(null));
     Promise.all(fetches).then(function (results) {
       if (results[0] && results[0].data) profilesCache[otherId] = results[0].data;
@@ -288,6 +341,7 @@
   }
 
   /* ── Init ── */
+  var initTs = new Date().toISOString();
   loadConversations()
     .then(ensureDeepLinkConversation)
     .then(function () {
@@ -296,7 +350,10 @@
         var key = convKey(deepArticleId, deepWithId);
         if (conversations[key]) openConversation(key);
       }
-      setupRealtime();
+      return setupRealtime();
+    })
+    .then(function () {
+      return reconcileMissedMessages(initTs);
     })
     .catch(function (err) {
       console.error('messages.js', err);
